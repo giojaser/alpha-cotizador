@@ -12,6 +12,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue, remove, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+         signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+// ── Expose Firebase to global scope after config is set ──────────────────────
+window._fbSDK = { initializeApp, getDatabase, ref, push, set, onValue, remove,
+                  serverTimestamp, getAuth, signInWithEmailAndPassword,
+                  createUserWithEmailAndPassword, signOut, onAuthStateChanged };
+</script>
+
 <style>
 :root {
   --black:   #080810;
@@ -350,6 +365,30 @@ select option { background:var(--card); }
 .edit-ing-btn { cursor:pointer; background:rgba(0,229,255,.1); border:1px solid rgba(0,229,255,.25); color:var(--cyan); width:26px; height:26px; border-radius:5px; font-size:.75rem; display:inline-flex; align-items:center; justify-content:center; transition:.15s; padding:0; }
 .edit-ing-btn:hover { background:rgba(0,229,255,.25); }
 
+/* ── FIREBASE / CLOUD UI ── */
+.fb-step { border:1px solid rgba(255,255,255,.08); border-radius:var(--radius-sm); margin-bottom:8px; overflow:hidden; }
+.fb-step-header { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; background:var(--card2); transition:.2s; user-select:none; }
+.fb-step-header:hover { background:rgba(255,215,0,.07); }
+.fb-step-num { width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--pink),#a0004e); color:#fff; font-family:'Bebas Neue',sans-serif; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.fb-step-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.95rem; color:var(--white); flex:1; }
+.fb-step-arrow { color:var(--muted); font-size:.75rem; transition:transform .2s; }
+.fb-step.open .fb-step-arrow { transform:rotate(180deg); }
+.fb-step-body { display:none; padding:14px 16px 16px; background:var(--panel); font-size:.88rem; color:var(--light); line-height:1.6; }
+.fb-step.open .fb-step-body { display:block; }
+.fb-step-img { background:rgba(0,0,0,.3); border-left:3px solid var(--gold); padding:10px 14px; border-radius:0 6px 6px 0; margin:10px 0; font-size:.85rem; line-height:1.7; }
+.fb-code { background:#0a0a18; border:1px solid rgba(0,229,255,.2); border-radius:6px; padding:12px 14px; font-family:monospace; font-size:.78rem; color:var(--cyan); overflow-x:auto; white-space:pre; margin:8px 0; }
+.fb-step-body a { color:var(--cyan); }
+.fb-step-body code { background:rgba(0,229,255,.1); padding:1px 6px; border-radius:4px; font-family:monospace; font-size:.82rem; color:var(--cyan); }
+.quote-card { background:var(--row-b); border:1px solid rgba(255,255,255,.07); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; transition:.15s; cursor:pointer; }
+.quote-card:hover { border-color:rgba(233,30,140,.3); background:rgba(233,30,140,.05); }
+.quote-card-info { flex:1; min-width:180px; }
+.quote-card-name { font-weight:700; color:var(--white); font-size:.9rem; }
+.quote-card-meta { font-size:.75rem; color:var(--muted); margin-top:2px; }
+.quote-card-total { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--green); letter-spacing:1px; }
+.quote-card-date { font-size:.72rem; color:var(--muted); text-align:right; }
+.btn-del-quote { background:rgba(255,82,82,.12); border:1px solid rgba(255,82,82,.25); color:var(--red); padding:5px 10px; border-radius:6px; cursor:pointer; font-size:.78rem; transition:.15s; }
+.btn-del-quote:hover { background:rgba(255,82,82,.3); }
+
 /* ── LOADING ── */
 .loading-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:999; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
 .loading-overlay.show { display:flex; }
@@ -469,6 +508,7 @@ select option { background:var(--card); }
       <button class="tab-btn" onclick="showTab('compras',this)">🛒 LISTA DE COMPRAS</button>
       <button class="tab-btn" onclick="showTab('rentabilidad',this)">📊 RENTABILIDAD</button>
       <button class="tab-btn" onclick="showTab('servicios',this)">🎭 SERVICIOS ALPHA</button>
+      <button class="tab-btn" onclick="showTab('nube',this)" id="tabNube">☁️ NUBE</button>
     </div>
   </div>
 </header>
@@ -647,6 +687,209 @@ select option { background:var(--card); }
     </div>
   </div>
 </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TAB 5 – NUBE / FIREBASE -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="section" id="tab-nube">
+<div class="container" style="padding-top:28px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div class="section-title">☁️ NUBE — FIREBASE</div>
+      <div class="section-sub">Guarda cotizaciones, clientes y datos en tiempo real · Accede desde cualquier dispositivo</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;" id="cloudAuthBtns">
+      <button class="btn btn-ghost" onclick="showFirebaseSetup()">⚙️ Configurar Firebase</button>
+    </div>
+  </div>
+  <hr class="sep">
+
+  <!-- CONNECTION STATUS BAR -->
+  <div id="fbStatusBar" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--card);border-radius:var(--radius);border:1px solid rgba(255,255,255,.08);margin-bottom:20px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="fbDot" style="width:10px;height:10px;border-radius:50%;background:var(--muted);transition:.3s;"></div>
+      <span id="fbStatusText" style="font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.85rem;color:var(--muted);">Sin configurar</span>
+    </div>
+    <div id="fbUserInfo" style="display:none;color:var(--cyan);font-size:.82rem;"></div>
+    <div style="margin-left:auto;display:flex;gap:8px;" id="fbActionBtns"></div>
+  </div>
+
+  <!-- STEP BY STEP GUIDE -->
+  <div id="fbGuideSection">
+    <div class="card" style="margin-bottom:16px;border-color:rgba(255,215,0,.2);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold);letter-spacing:2px;margin-bottom:16px;">📋 GUÍA PASO A PASO — CONECTAR A FIREBASE</div>
+
+      <!-- Steps -->
+      <div id="fbSteps">
+        <div class="fb-step" id="step1">
+          <div class="fb-step-header" onclick="toggleStep(1)">
+            <span class="fb-step-num">1</span>
+            <span class="fb-step-title">Crear proyecto en Firebase</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>Ve a <a href="https://console.firebase.google.com" target="_blank" style="color:var(--cyan);">console.firebase.google.com</a> e inicia sesión con tu cuenta Google.</p>
+            <div class="fb-step-img">🌐 → Clic en <b style="color:var(--gold);">"Crear un proyecto"</b> → Nombre: <code>alpha-producciones</code> → Clic <b>"Continuar"</b> → Desactiva Analytics (opcional) → <b>"Crear proyecto"</b></div>
+          </div>
+        </div>
+
+        <div class="fb-step" id="step2">
+          <div class="fb-step-header" onclick="toggleStep(2)">
+            <span class="fb-step-num">2</span>
+            <span class="fb-step-title">Registrar tu app Web en Firebase</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>Dentro de tu proyecto Firebase:</p>
+            <div class="fb-step-img">⚙️ Clic en el ícono <b style="color:var(--gold);">&lt;/&gt; Web</b> → Nombre: <code>alpha-cotizador</code> → <b>"Registrar app"</b> → Copia el objeto <code>firebaseConfig</code> que aparece → <b>"Continuar a la consola"</b></div>
+            <p style="margin-top:10px;">El <code>firebaseConfig</code> se ve así:</p>
+            <pre class="fb-code">const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "alpha-producciones.firebaseapp.com",
+  databaseURL: "https://alpha-producciones-default-rtdb.firebaseio.com",
+  projectId: "alpha-producciones",
+  storageBucket: "alpha-producciones.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123"
+};</pre>
+          </div>
+        </div>
+
+        <div class="fb-step" id="step3">
+          <div class="fb-step-header" onclick="toggleStep(3)">
+            <span class="fb-step-num">3</span>
+            <span class="fb-step-title">Activar Realtime Database</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>En el menú izquierdo de Firebase Console:</p>
+            <div class="fb-step-img">📁 <b style="color:var(--gold);">Compilación</b> → <b>"Realtime Database"</b> → <b>"Crear base de datos"</b> → Ubicación: <code>us-central1</code> → Modo: <b>"Comenzar en modo de prueba"</b> → <b>"Habilitar"</b></div>
+            <p style="margin-top:10px;color:var(--orange);">⚠️ El modo de prueba dura 30 días. Después debes configurar reglas de seguridad.</p>
+          </div>
+        </div>
+
+        <div class="fb-step" id="step4">
+          <div class="fb-step-header" onclick="toggleStep(4)">
+            <span class="fb-step-num">4</span>
+            <span class="fb-step-title">Activar Authentication (Email/Password)</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>En Firebase Console menú izquierdo:</p>
+            <div class="fb-step-img">🔐 <b style="color:var(--gold);">Compilación</b> → <b>"Authentication"</b> → <b>"Comenzar"</b> → Pestaña <b>"Sign-in method"</b> → <b>"Correo electrónico/contraseña"</b> → Activar → <b>"Guardar"</b></div>
+          </div>
+        </div>
+
+        <div class="fb-step" id="step5">
+          <div class="fb-step-header" onclick="toggleStep(5)">
+            <span class="fb-step-num">5</span>
+            <span class="fb-step-title">Pegar tu configuración aquí abajo</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>Copia el <code>firebaseConfig</code> de tu proyecto y pégalo en el campo de abajo:</p>
+            <button class="btn btn-gold" style="margin-top:8px;" onclick="showFirebaseSetup()">⚙️ Abrir Configuración Firebase</button>
+          </div>
+        </div>
+
+        <div class="fb-step" id="step6">
+          <div class="fb-step-header" onclick="toggleStep(6)">
+            <span class="fb-step-num">6</span>
+            <span class="fb-step-title">Publicar en GitHub Pages</span>
+            <span class="fb-step-arrow">▼</span>
+          </div>
+          <div class="fb-step-body">
+            <p>Para que tu app esté en línea:</p>
+            <div class="fb-step-img">1. Ve a <a href="https://github.com" target="_blank" style="color:var(--cyan);">github.com</a> → Crea cuenta → <b>"New repository"</b><br>
+            2. Nombre: <code>alpha-cotizador</code> · Público ✅<br>
+            3. Sube tu <code>index.html</code> → <b>"Commit changes"</b><br>
+            4. <b>Settings</b> → <b>Pages</b> → Source: <code>main / root</code> → <b>Save</b><br>
+            5. URL lista: <code>https://TU-USUARIO.github.io/alpha-cotizador</code></div>
+            <p style="margin-top:10px;color:var(--orange);">⚠️ Agrega tu dominio GitHub a Firebase: Console → Authentication → <b>Authorized domains</b> → <b>"Agregar dominio"</b></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLOUD DASHBOARD (visible when connected) -->
+  <div id="fbDashboard" style="display:none;">
+
+    <!-- Save current quote button -->
+    <div class="card" style="margin-bottom:16px;border-color:rgba(0,230,118,.2);">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green);letter-spacing:2px;">💾 GUARDAR COTIZACIÓN ACTUAL</div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Guarda los datos del cotizador en la nube</div>
+        </div>
+        <button class="btn btn-green" onclick="saveQuoteToCloud()">☁️ Guardar en Nube</button>
+      </div>
+      <div id="fbSaveMsg" style="display:none;margin-top:10px;"></div>
+    </div>
+
+    <!-- Saved quotes list -->
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--cyan);letter-spacing:2px;">📁 COTIZACIONES GUARDADAS</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="fbSearchInput" placeholder="Buscar cliente..." oninput="filterQuotes()" style="padding:6px 12px;background:var(--input);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:var(--white);font-size:.85rem;outline:none;width:180px;">
+        </div>
+      </div>
+      <div id="fbQuotesList"><div class="alert alert-info">Cargando cotizaciones...</div></div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<!-- FIREBASE CONFIG MODAL -->
+<div class="modal-overlay" id="fbConfigModal">
+  <div class="modal" style="max-width:620px;">
+    <button class="modal-close" onclick="document.getElementById('fbConfigModal').classList.remove('open')">✕</button>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">⚙️ CONFIGURACIÓN FIREBASE</h2>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:18px;">Pega aquí el objeto <code>firebaseConfig</code> de tu proyecto. Lo encontrarás en Firebase Console → Configuración del proyecto → Tu aplicación web.</p>
+
+    <div style="margin-bottom:14px;">
+      <label>PEGA TU firebaseConfig AQUÍ</label>
+      <textarea id="fbConfigInput" rows="10" placeholder='const firebaseConfig = {
+  apiKey: "AIzaSy...",
+  authDomain: "tu-proyecto.firebaseapp.com",
+  databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
+  projectId: "tu-proyecto",
+  storageBucket: "tu-proyecto.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123"
+};' style="font-family:monospace;font-size:.82rem;resize:vertical;"></textarea>
+    </div>
+
+    <div style="background:var(--row-a);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;color:var(--cyan);letter-spacing:1px;margin-bottom:10px;">🔐 CREAR USUARIO ADMINISTRADOR</div>
+      <div class="grid-2" style="gap:10px;">
+        <div><label>EMAIL</label><input type="email" id="fbEmail" placeholder="admin@alphaproducciones.mx"></div>
+        <div><label>CONTRASEÑA</label><input type="password" id="fbPassword" placeholder="mínimo 6 caracteres"></div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-cyan" style="flex:1;" onclick="fbRegister()">➕ Crear cuenta</button>
+        <button class="btn btn-pink" style="flex:1;" onclick="fbLogin()">🔑 Iniciar sesión</button>
+      </div>
+      <div id="fbAuthMsg" style="margin-top:8px;font-size:.82rem;"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="document.getElementById('fbConfigModal').classList.remove('open')">Cancelar</button>
+      <button class="btn btn-gold" onclick="initFirebase()">✅ Conectar a Firebase</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTE DETAIL MODAL -->
+<div class="modal-overlay" id="fbQuoteDetailModal">
+  <div class="modal" style="max-width:780px;">
+    <button class="modal-close" onclick="document.getElementById('fbQuoteDetailModal').classList.remove('open')">✕</button>
+    <div id="fbQuoteDetailContent"></div>
+  </div>
 </div>
 
 <!-- ═══════════════ JAVASCRIPT ═══════════════ -->
@@ -1558,6 +1801,371 @@ function getEffectiveIngredients(pid){
 }
 
 
+// ── FIREBASE CLOUD ────────────────────────────────────────────────────────────
+let fbApp=null, fbDb=null, fbAuth=null, fbUser=null, fbQuotesRef=null;
+let allCloudQuotes=[];
+
+function showFirebaseSetup(){
+  // Pre-fill from localStorage if saved
+  const saved = localStorage.getItem('fbConfig');
+  if(saved) document.getElementById('fbConfigInput').value = saved;
+  const savedEmail = localStorage.getItem('fbEmail');
+  if(savedEmail) document.getElementById('fbEmail').value = savedEmail;
+  document.getElementById('fbConfigModal').classList.add('open');
+}
+
+function parseFirebaseConfig(raw){
+  // Accept either raw JSON object or const firebaseConfig = {...}
+  try {
+    // Strip JS assignment wrapper if present
+    let cleaned = raw.trim();
+    cleaned = cleaned.replace(/^const\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '');
+    return JSON.parse(cleaned);
+  } catch(e){
+    // Try extracting JSON with regex
+    const match = raw.match(/\{[\s\S]*\}/);
+    if(match){ try{ return JSON.parse(match[0]); }catch(e2){} }
+    return null;
+  }
+}
+
+async function initFirebase(){
+  const raw = document.getElementById('fbConfigInput').value.trim();
+  if(!raw){ alert('Pega tu firebaseConfig primero'); return; }
+
+  const config = parseFirebaseConfig(raw);
+  if(!config || !config.apiKey){
+    alert('❌ Formato inválido. Asegúrate de pegar el objeto firebaseConfig completo.');
+    return;
+  }
+
+  // Save config for reuse
+  localStorage.setItem('fbConfig', JSON.stringify(config));
+
+  try {
+    showLoading('CONECTANDO A FIREBASE...');
+    const sdk = window._fbSDK;
+    if(!sdk){ hideLoading(); alert('SDK de Firebase no cargó. Verifica tu conexión a internet.'); return; }
+
+    fbApp  = sdk.initializeApp(config, 'alpha-'+Date.now());
+    fbDb   = sdk.getDatabase(fbApp);
+    fbAuth = sdk.getAuth(fbApp);
+
+    // Auth state listener
+    sdk.onAuthStateChanged(fbAuth, user => {
+      fbUser = user;
+      updateFbStatusBar();
+      if(user){
+        fbQuotesRef = sdk.ref(fbDb, 'cotizaciones/'+user.uid);
+        listenToQuotes();
+      }
+    });
+
+    hideLoading();
+    document.getElementById('fbConfigModal').classList.remove('open');
+    setFbStatus('connecting','Conectando...');
+
+    // Try auto-login with saved credentials
+    const savedEmail = localStorage.getItem('fbEmail');
+    const savedPwd   = localStorage.getItem('fbPwd');
+    if(savedEmail && savedPwd){
+      try {
+        await sdk.signInWithEmailAndPassword(fbAuth, savedEmail, savedPwd);
+      } catch(e){ /* silent fail — user can login manually */ }
+    }
+
+  } catch(e){
+    hideLoading();
+    alert('❌ Error al inicializar Firebase:\n'+e.message+'\n\nVerifica que el firebaseConfig sea correcto y que el databaseURL esté incluido.');
+  }
+}
+
+async function fbLogin(){
+  const email = document.getElementById('fbEmail').value.trim();
+  const pwd   = document.getElementById('fbPassword').value;
+  const msg   = document.getElementById('fbAuthMsg');
+  if(!email||!pwd){ msg.textContent='❌ Ingresa email y contraseña'; msg.style.color='var(--red)'; return; }
+  if(!fbAuth){ await initFirebase(); return; }
+  try {
+    msg.textContent='🔄 Iniciando sesión...'; msg.style.color='var(--cyan)';
+    await window._fbSDK.signInWithEmailAndPassword(fbAuth, email, pwd);
+    localStorage.setItem('fbEmail', email);
+    localStorage.setItem('fbPwd', pwd);
+    msg.textContent='✅ Sesión iniciada'; msg.style.color='var(--green)';
+    setTimeout(()=>document.getElementById('fbConfigModal').classList.remove('open'),800);
+  } catch(e){
+    msg.textContent='❌ '+translateFbError(e.code); msg.style.color='var(--red)';
+  }
+}
+
+async function fbRegister(){
+  const email = document.getElementById('fbEmail').value.trim();
+  const pwd   = document.getElementById('fbPassword').value;
+  const msg   = document.getElementById('fbAuthMsg');
+  if(!email||!pwd){ msg.textContent='❌ Ingresa email y contraseña'; msg.style.color='var(--red)'; return; }
+  if(pwd.length<6){ msg.textContent='❌ La contraseña debe tener mínimo 6 caracteres'; msg.style.color='var(--red)'; return; }
+  if(!fbAuth){ await initFirebase(); if(!fbAuth) return; }
+  try {
+    msg.textContent='🔄 Creando cuenta...'; msg.style.color='var(--cyan)';
+    await window._fbSDK.createUserWithEmailAndPassword(fbAuth, email, pwd);
+    localStorage.setItem('fbEmail', email);
+    localStorage.setItem('fbPwd', pwd);
+    msg.textContent='✅ Cuenta creada e iniciada'; msg.style.color='var(--green)';
+    setTimeout(()=>document.getElementById('fbConfigModal').classList.remove('open'),800);
+  } catch(e){
+    msg.textContent='❌ '+translateFbError(e.code); msg.style.color='var(--red)';
+  }
+}
+
+async function fbLogout(){
+  if(!fbAuth) return;
+  await window._fbSDK.signOut(fbAuth);
+  fbUser=null; fbQuotesRef=null; allCloudQuotes=[];
+  updateFbStatusBar();
+  document.getElementById('fbDashboard').style.display='none';
+  document.getElementById('fbGuideSection').style.display='block';
+}
+
+function translateFbError(code){
+  const map={
+    'auth/user-not-found':'Usuario no encontrado',
+    'auth/wrong-password':'Contraseña incorrecta',
+    'auth/email-already-in-use':'Este email ya está registrado',
+    'auth/invalid-email':'Email inválido',
+    'auth/weak-password':'Contraseña muy débil (mín. 6 caracteres)',
+    'auth/network-request-failed':'Sin conexión a internet',
+    'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
+  };
+  return map[code]||code;
+}
+
+function setFbStatus(state, text){
+  const dot  = document.getElementById('fbDot');
+  const stxt = document.getElementById('fbStatusText');
+  const colors = { connected:'#00e676', connecting:'#ff9800', error:'#ff5252', disconnected:'#888' };
+  dot.style.background  = colors[state]||colors.disconnected;
+  dot.style.boxShadow   = state==='connected'?'0 0 8px #00e676':'none';
+  stxt.textContent      = text;
+  stxt.style.color      = colors[state]||'#888';
+}
+
+function updateFbStatusBar(){
+  const userInfo = document.getElementById('fbUserInfo');
+  const actionBtns = document.getElementById('fbActionBtns');
+  if(fbUser){
+    setFbStatus('connected','Conectado a Firebase');
+    userInfo.style.display='block';
+    userInfo.innerHTML=`👤 ${fbUser.email}`;
+    actionBtns.innerHTML=`<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" onclick="fbLogout()">🚪 Cerrar sesión</button>`;
+    document.getElementById('fbDashboard').style.display='block';
+    document.getElementById('fbGuideSection').style.display='none';
+    // Update tab indicator
+    document.getElementById('tabNube').textContent='☁️ NUBE ✅';
+  } else if(fbApp){
+    setFbStatus('connecting','Firebase iniciado — inicia sesión');
+    userInfo.style.display='none';
+    actionBtns.innerHTML=`<button class="btn btn-pink" style="font-size:.78rem;padding:6px 12px;" onclick="showFirebaseSetup()">🔑 Iniciar sesión</button>`;
+    document.getElementById('fbDashboard').style.display='none';
+    document.getElementById('fbGuideSection').style.display='block';
+  } else {
+    setFbStatus('disconnected','Sin configurar');
+    userInfo.style.display='none';
+    actionBtns.innerHTML='';
+  }
+}
+
+async function saveQuoteToCloud(){
+  if(!fbUser||!fbDb){ alert('Conéctate a Firebase primero'); return; }
+  const allPkgs=[...PACKAGES,...customPkgs].filter(p=>p.cat!=="section"&&(quantities[p.id]||0)>0);
+  if(!allPkgs.length){ alert('Agrega al menos un paquete al cotizador'); return; }
+
+  let totalRev=0;
+  const items=allPkgs.map(p=>{
+    const qty=quantities[p.id];
+    const price=userPrices[p.id]!==undefined?userPrices[p.id]:p.price;
+    const sub=p.fixed?price:price*qty;
+    totalRev+=sub;
+    return {nombre:p.name, cantidad:p.fixed?'Fijo':qty, precio:price, subtotal:sub};
+  });
+
+  const quoteData = {
+    cliente:    document.getElementById('ev_cliente').value||'Sin nombre',
+    tipoEvento: document.getElementById('ev_tipo').value||'-',
+    fecha:      document.getElementById('ev_fecha').value||'-',
+    lugar:      document.getElementById('ev_lugar').value||'-',
+    horaIni:    document.getElementById('ev_hora_ini').value||'-',
+    horaFin:    document.getElementById('ev_hora_fin').value||'-',
+    personas:   document.getElementById('ev_personas').value||0,
+    servicios:  items,
+    total:      totalRev,
+    costoReal:  getRealCostFromChecked(),
+    ganancia:   totalRev - getRealCostFromChecked(),
+    creadoEn:   window._fbSDK.serverTimestamp(),
+    creadoPor:  fbUser.email,
+  };
+
+  try {
+    showLoading('GUARDANDO EN LA NUBE...');
+    await window._fbSDK.push(fbQuotesRef, quoteData);
+    hideLoading();
+    const msg = document.getElementById('fbSaveMsg');
+    msg.style.display='block';
+    msg.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada correctamente en la nube</div>';
+    setTimeout(()=>msg.style.display='none', 3500);
+  } catch(e){
+    hideLoading();
+    alert('❌ Error al guardar: '+e.message);
+  }
+}
+
+function listenToQuotes(){
+  if(!fbQuotesRef) return;
+  const sdk = window._fbSDK;
+  sdk.onValue(fbQuotesRef, snap => {
+    allCloudQuotes=[];
+    if(snap.exists()){
+      snap.forEach(child=>{
+        allCloudQuotes.push({id:child.key, ...child.val()});
+      });
+      allCloudQuotes.reverse(); // newest first
+    }
+    renderQuotesList(allCloudQuotes);
+  });
+}
+
+function filterQuotes(){
+  const q = document.getElementById('fbSearchInput').value.toLowerCase();
+  const filtered = allCloudQuotes.filter(c=>
+    (c.cliente||'').toLowerCase().includes(q) ||
+    (c.tipoEvento||'').toLowerCase().includes(q) ||
+    (c.fecha||'').includes(q)
+  );
+  renderQuotesList(filtered);
+}
+
+function renderQuotesList(quotes){
+  const container = document.getElementById('fbQuotesList');
+  if(!quotes.length){
+    container.innerHTML='<div class="alert alert-info">No hay cotizaciones guardadas aún. Guarda la primera desde el Cotizador.</div>';
+    return;
+  }
+  container.innerHTML = quotes.map(q=>{
+    const dateStr = q.creadoEn ? new Date(q.creadoEn).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+    const margin = q.total>0 ? ((q.ganancia/q.total)*100).toFixed(0)+'%' : '-';
+    return `<div class="quote-card" onclick="showQuoteDetail('${q.id}')">
+      <div class="quote-card-info">
+        <div class="quote-card-name">👤 ${escHtml(q.cliente||'Sin nombre')}</div>
+        <div class="quote-card-meta">🎉 ${escHtml(q.tipoEvento||'-')} · 📅 ${escHtml(q.fecha||'-')} · 📍 ${escHtml(q.lugar||'-')} · 👥 ${q.personas||0} personas</div>
+      </div>
+      <div style="text-align:center;">
+        <div class="quote-card-total">${fmt(q.total)}</div>
+        <div style="font-size:.72rem;color:var(--green);">Margen: ${margin}</div>
+      </div>
+      <div class="quote-card-date">
+        <div>${dateStr}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end;">
+          <button class="btn-del-quote" onclick="event.stopPropagation();loadQuoteToEditor('${q.id}')">📂 Cargar</button>
+          <button class="btn-del-quote" onclick="event.stopPropagation();deleteCloudQuote('${q.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showQuoteDetail(id){
+  const q = allCloudQuotes.find(x=>x.id===id);
+  if(!q) return;
+  const modal = document.getElementById('fbQuoteDetailModal');
+  const content = document.getElementById('fbQuoteDetailContent');
+  const rows = (q.servicios||[]).map(s=>`
+    <tr>
+      <td>${escHtml(s.nombre)}</td>
+      <td style="text-align:center;">${s.cantidad}</td>
+      <td style="text-align:right;">${fmt(s.precio)}</td>
+      <td style="text-align:right;font-weight:700;">${fmt(s.subtotal)}</td>
+    </tr>`).join('');
+  content.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:2px;">${escHtml(q.cliente||'Sin nombre')}</div>
+        <div style="color:var(--muted);font-size:.82rem;">${escHtml(q.tipoEvento||'-')} · ${escHtml(q.fecha||'-')} · ${escHtml(q.lugar||'-')}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green);">${fmt(q.total)}</div>
+        <div style="font-size:.75rem;color:var(--muted);">Costo real: ${fmt(q.costoReal)} · Ganancia: ${fmt(q.ganancia)}</div>
+      </div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--card2);">
+        <th style="padding:8px 10px;text-align:left;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;">SERVICIO</th>
+        <th style="padding:8px 10px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">CANT.</th>
+        <th style="padding:8px 10px;text-align:right;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">PRECIO</th>
+        <th style="padding:8px 10px;text-align:right;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">SUBTOTAL</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-cyan" onclick="loadQuoteToEditor('${q.id}');document.getElementById('fbQuoteDetailModal').classList.remove('open')">📂 Cargar en Cotizador</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('fbQuoteDetailModal').classList.remove('open')">Cerrar</button>
+    </div>`;
+  modal.classList.add('open');
+}
+
+function loadQuoteToEditor(id){
+  const q = allCloudQuotes.find(x=>x.id===id);
+  if(!q) return;
+  // Fill event data
+  document.getElementById('ev_cliente').value  = q.cliente||'';
+  document.getElementById('ev_tipo').value      = q.tipoEvento||'';
+  document.getElementById('ev_fecha').value     = q.fecha||'';
+  document.getElementById('ev_lugar').value     = q.lugar||'';
+  document.getElementById('ev_hora_ini').value  = q.horaIni||'';
+  document.getElementById('ev_hora_fin').value  = q.horaFin||'';
+  document.getElementById('ev_personas').value  = q.personas||100;
+  // Load quantities
+  quantities={};
+  (q.servicios||[]).forEach(s=>{
+    const found=[...PACKAGES,...customPkgs].find(p=>p.name===s.nombre);
+    if(found) quantities[found.id]=typeof s.cantidad==='number'?s.cantidad:(found.fixed?1:s.cantidad);
+  });
+  recalcAll();
+  // Switch to cotizador tab
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-cotizador').classList.add('active');
+  document.querySelector('.tab-btn').classList.add('active');
+}
+
+async function deleteCloudQuote(id){
+  if(!fbDb||!fbUser) return;
+  if(!confirm('¿Eliminar esta cotización de la nube?')) return;
+  try {
+    await window._fbSDK.remove(window._fbSDK.ref(fbDb,'cotizaciones/'+fbUser.uid+'/'+id));
+  } catch(e){ alert('Error al eliminar: '+e.message); }
+}
+
+function toggleStep(n){
+  const el=document.getElementById('step'+n);
+  el.classList.toggle('open');
+}
+
+// Auto-init if config saved in localStorage
+window.addEventListener('load', ()=>{
+  const saved = localStorage.getItem('fbConfig');
+  if(saved){
+    try{
+      const config=JSON.parse(saved);
+      document.getElementById('fbConfigInput').value=JSON.stringify(config,null,2);
+      // Auto-connect
+      setTimeout(initFirebase,1200);
+    }catch(e){}
+  }
+  // Open step 1 by default
+  const s1=document.getElementById('step1');
+  if(s1) s1.classList.add('open');
+});
+
+
 function showLoading(txt){
   document.getElementById("loadingText").textContent=txt;
   document.getElementById("loadingOverlay").classList.add("show");
@@ -1574,6 +2182,7 @@ function showTab(id,btn){
   btn.classList.add("active");
   if(id==="compras") updateShopList();
   if(id==="rentabilidad") updateProfitability();
+  if(id==="nube") updateFbStatusBar();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1585,6 +2194,8 @@ updateProfitability();
 document.getElementById("quoteModal").addEventListener("click",function(e){if(e.target===this)closeModal();});
 document.getElementById("addPkgModal").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
 document.getElementById("ingEditorModal").addEventListener("click",function(e){if(e.target===this)closeIngEditor();});
+document.getElementById("fbConfigModal").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
+document.getElementById("fbQuoteDetailModal").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
 </script>
 </body>
 </html>
