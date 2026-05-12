@@ -289,37 +289,130 @@ select option { background:var(--card); }
 .badge-warn { background:rgba(255,152,0,.12); color:var(--orange); border:1px solid rgba(255,152,0,.25); }
 .badge-bad  { background:rgba(255,82,82,.12); color:var(--red); border:1px solid rgba(255,82,82,.25); }
 
-/* ── QUOTE / COTIZACIÓN PDF ── */
+/* ── COTIZACIÓN / CONTRATO — tamaño carta, hoja blanca ── */
 #quote-preview {
-  background:#fff; color:#111; padding:0; border-radius:var(--radius);
-  overflow:hidden; box-shadow:0 0 60px rgba(0,0,0,.6);
+  background:#fff; color:#1a1a1a;
+  width:100%; max-width:216mm;   /* carta width */
+  margin:0 auto; padding:0;
+  border-radius:4px;
+  box-shadow:0 4px 32px rgba(0,0,0,.35);
+  font-family:'Times New Roman',Times,serif;
 }
+/* Header banda superior */
+.qp-topband { background:#1a1a2e; height:8px; }
 .qp-header {
-  background:linear-gradient(135deg,#0d0d1a,#1a0030);
-  padding:28px 36px; display:flex; align-items:center; gap:24px;
+  padding:18px 28px 14px;
+  display:flex; align-items:flex-start; gap:16px;
+  border-bottom:2px solid #1a1a2e;
+  background:#fff;
 }
-.qp-header img { width:80px; height:62px; object-fit:contain; }
-.qp-header-text h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:3px; color:#e91e8c; }
-.qp-header-text p  { color:#00e5ff; font-size:.8rem; letter-spacing:1.5px; font-family:'Rajdhani',sans-serif; }
-.qp-header-contact { margin-left:auto; text-align:right; color:#ffd700; font-size:.8rem; font-family:'Rajdhani',sans-serif; line-height:1.7; }
-.qp-body { padding:28px 36px; background:#ffffff; }
-.qp-section-title { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.8rem; letter-spacing:2px; text-transform:uppercase; color:#888; border-bottom:2px solid #e91e8c; padding-bottom:6px; margin:18px 0 12px; }
-.qp-client-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
-.qp-client-item { }
-.qp-client-item .lbl { font-size:.7rem; text-transform:uppercase; letter-spacing:1px; color:#aaa; font-family:'Rajdhani',sans-serif; font-weight:700; }
-.qp-client-item .val { font-size:.95rem; font-weight:600; color:#111; font-family:'Exo 2',sans-serif; }
-.qp-services-table { width:100%; border-collapse:collapse; }
-.qp-services-table th { background:#0d0d1a; color:#ffd700; padding:9px 12px; font-family:'Rajdhani',sans-serif; font-size:.72rem; letter-spacing:1.5px; text-transform:uppercase; text-align:left; }
-.qp-services-table td { padding:9px 12px; border-bottom:1px solid #f0f0f0; font-size:.88rem; color:#222; }
-.qp-services-table tr:nth-child(even) td { background:#f9f9f9; }
-.qp-total-row { background:#0d0d1a !important; }
-.qp-total-row td { color:#ffd700 !important; font-weight:700 !important; font-size:1rem !important; border:none !important; }
-.qp-footer { background:linear-gradient(135deg,#0d0d1a,#1a0030); padding:18px 36px; display:flex; justify-content:space-between; align-items:center; }
-.qp-footer-note { color:#888; font-size:.75rem; max-width:380px; line-height:1.5; }
-.qp-footer-cta { text-align:right; }
-.qp-footer-cta p { color:#00e5ff; font-family:'Rajdhani',sans-serif; font-size:.85rem; letter-spacing:1px; }
-.qp-footer-cta strong { color:#e91e8c; font-size:1.1rem; letter-spacing:2px; }
-.qp-includes { background:#f8f8ff; border-left:4px solid #e91e8c; padding:10px 14px; margin:12px 0; border-radius:0 6px 6px 0; font-size:.82rem; color:#444; }
+.qp-header img { width:70px; height:54px; object-fit:contain; flex-shrink:0; }
+.qp-header-center { flex:1; text-align:center; }
+.qp-header-center h1 {
+  font-family:'Bebas Neue',sans-serif; font-size:1.7rem;
+  letter-spacing:4px; color:#1a1a2e; margin:0 0 2px;
+}
+.qp-header-center p { font-size:.72rem; color:#555; letter-spacing:1px; margin:1px 0; line-height:1.4; }
+.qp-header-right { text-align:right; font-size:.72rem; color:#333; line-height:1.8; min-width:130px; }
+.qp-header-right strong { display:block; font-size:.85rem; color:#1a1a2e; }
+
+/* Folio / numero contrato */
+.qp-folio-bar {
+  background:#1a1a2e; color:#ffd700;
+  padding:6px 28px; display:flex; justify-content:space-between; align-items:center;
+  font-family:'Rajdhani',sans-serif; font-size:.8rem; letter-spacing:1.5px; text-transform:uppercase;
+}
+
+/* Body */
+.qp-body { padding:18px 28px; background:#fff; }
+
+/* Título contrato */
+.qp-contract-title {
+  text-align:center; font-family:'Times New Roman',serif;
+  font-size:1rem; font-weight:700; color:#1a1a2e;
+  text-transform:uppercase; letter-spacing:2px;
+  margin:0 0 10px; padding-bottom:8px;
+  border-bottom:1px solid #ccc;
+}
+.qp-contract-intro {
+  font-size:.78rem; color:#333; line-height:1.7;
+  text-align:justify; margin-bottom:12px;
+}
+
+/* Sección */
+.qp-section-title {
+  font-family:'Rajdhani',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:2px; text-transform:uppercase; color:#fff;
+  background:#1a1a2e; padding:5px 12px; margin:12px 0 8px;
+  border-radius:2px;
+}
+
+/* Grid cliente */
+.qp-client-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 20px; margin-bottom:10px; }
+.qp-client-item .lbl { font-size:.65rem; text-transform:uppercase; letter-spacing:1px; color:#888; font-family:'Rajdhani',sans-serif; font-weight:700; }
+.qp-client-item .val { font-size:.82rem; font-weight:700; color:#1a1a2e; border-bottom:1px solid #ddd; padding-bottom:2px; min-height:16px; }
+@media(max-width:480px){ .qp-client-grid { grid-template-columns:1fr; } }
+
+/* Claúsulas */
+.qp-clause { margin:8px 0; font-size:.78rem; color:#222; line-height:1.65; }
+.qp-clause strong { font-size:.78rem; color:#1a1a2e; text-transform:uppercase; }
+
+/* Tabla servicios */
+.qp-services-table { width:100%; border-collapse:collapse; margin:8px 0; font-size:.78rem; }
+.qp-services-table th {
+  background:#1a1a2e; color:#ffd700; padding:7px 10px;
+  font-family:'Rajdhani',sans-serif; font-size:.7rem;
+  letter-spacing:1.5px; text-transform:uppercase; text-align:left;
+}
+.qp-services-table td { padding:7px 10px; border-bottom:1px solid #e8e8e8; color:#222; vertical-align:top; }
+.qp-services-table tr:nth-child(even) td { background:#f8f8f8; }
+.qp-subtotal-row td { background:#f0f0f8 !important; font-weight:700; color:#1a1a2e !important; border-top:1px solid #aaa; }
+.qp-total-row td { background:#1a1a2e !important; color:#ffd700 !important; font-weight:700 !important; font-size:.9rem !important; border:none !important; }
+.qp-anticipo-row td { background:#e8f5e9 !important; color:#1b5e20 !important; font-weight:700 !important; border-top:1px solid #aaa; }
+
+/* Includes */
+.qp-includes { background:#f8f8ff; border-left:3px solid #1a1a2e; padding:8px 12px; margin:8px 0; font-size:.74rem; color:#444; line-height:1.5; }
+
+/* Claúsulas contrato */
+.qp-clauses { margin:10px 0; }
+.qp-clause-block { margin:6px 0; font-size:.76rem; color:#222; line-height:1.6; text-align:justify; }
+.qp-clause-block strong { color:#1a1a2e; }
+
+/* Firmas */
+.qp-signatures {
+  display:grid; grid-template-columns:1fr 1fr; gap:20px;
+  margin-top:24px; padding-top:14px; border-top:1px solid #ccc;
+}
+@media(max-width:480px){ .qp-signatures { grid-template-columns:1fr; } }
+.qp-sig-block { text-align:center; }
+.qp-sig-line { border-top:1px solid #333; margin:40px 16px 6px; }
+.qp-sig-name { font-size:.78rem; font-weight:700; color:#1a1a2e; text-transform:uppercase; }
+.qp-sig-role { font-size:.7rem; color:#666; }
+
+/* Footer */
+.qp-footer {
+  background:#1a1a2e; padding:10px 28px;
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.68rem; color:#aaa; flex-wrap:wrap; gap:6px;
+}
+.qp-footer strong { color:#ffd700; }
+.qp-bottomband { background:#e91e8c; height:5px; }
+
+/* Nota/stamp */
+.qp-stamp {
+  display:inline-block; border:2px solid #e91e8c; border-radius:4px;
+  padding:4px 10px; color:#e91e8c; font-size:.68rem; font-weight:700;
+  letter-spacing:2px; text-transform:uppercase; margin-top:6px;
+}
+
+/* ── RESPONSIVE quote preview ── */
+@media(max-width:600px){
+  .qp-header { flex-direction:column; align-items:center; text-align:center; padding:14px 16px 10px; }
+  .qp-header-right { text-align:center; min-width:unset; }
+  .qp-body { padding:14px 16px; }
+  .qp-folio-bar { padding:6px 16px; flex-direction:column; gap:2px; }
+  #quote-preview { font-size:13px; }
+}
 
 /* ── MODAL ── */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; backdrop-filter:blur(8px); }
@@ -555,8 +648,20 @@ select option { background:var(--card); }
         <label>NÚMERO TOTAL DE PERSONAS (REFERENCIA)</label>
         <input type="number" id="ev_personas" value="100" min="1" oninput="recalcAll()">
       </div>
-      <div class="alert alert-info" style="flex:1;">ℹ️ Ingresa personas <b>por paquete</b> en la tabla abajo. Mínimo 50 personas por paquete de comida.</div>
+      <div style="min-width:160px;">
+        <label>TELÉFONO / WHATSAPP CLIENTE</label>
+        <input type="text" id="ev_telefono" placeholder="492 XXX XXXX">
+      </div>
+      <div style="min-width:120px;">
+        <label>ANTICIPO (%)</label>
+        <input type="number" id="ev_anticipo" value="50" min="0" max="100" placeholder="50">
+      </div>
     </div>
+    <div style="margin-top:10px;">
+      <label>NOTAS ADICIONALES / OBSERVACIONES</label>
+      <textarea id="ev_notas" rows="2" placeholder="Requisitos especiales, indicaciones, condiciones adicionales..." style="width:100%;padding:8px 12px;background:var(--input);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:var(--white);font-size:.85rem;outline:none;resize:vertical;"></textarea>
+    </div>
+    <div class="alert alert-info" style="margin-top:8px;">ℹ️ Ingresa personas <b>por paquete</b> en la tabla abajo. Mínimo 50 personas por paquete de comida.</div>
   </div>
 
   <!-- KPIs -->
@@ -853,7 +958,7 @@ select option { background:var(--card); }
 
     <div style="margin-bottom:14px;">
       <label>PEGA TU firebaseConfig AQUÍ</label>
-      <textarea id="fbConfigInput" rows="10" placeholder='const firebaseConfig = {
+      <textarea id="fbConfigInput" rows="10" oninput="previewParsedConfig()" placeholder='const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "tu-proyecto.firebaseapp.com",
   databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
@@ -862,6 +967,7 @@ select option { background:var(--card); }
   messagingSenderId: "123456789",
   appId: "1:123456789:web:abc123"
 };' style="font-family:monospace;font-size:.82rem;resize:vertical;"></textarea>
+      <div id="fbParseMsg" style="display:none;margin-top:8px;"></div>
     </div>
 
     <div style="background:var(--row-a);border-radius:8px;padding:14px;margin-bottom:16px;">
@@ -1373,79 +1479,225 @@ function openQuotePreview(autoSend=false){
   const allPkgs=[...PACKAGES,...customPkgs].filter(p=>p.cat!=="section"&&(quantities[p.id]||0)>0);
   if(!allPkgs.length){alert("⚠️ Agrega al menos un paquete con personas para generar la cotización");return;}
 
-  const cliente=document.getElementById("ev_cliente").value||"—";
-  const tipo=document.getElementById("ev_tipo").value||"—";
-  const fecha=document.getElementById("ev_fecha").value;
-  const lugar=document.getElementById("ev_lugar").value||"—";
-  const horaIni=document.getElementById("ev_hora_ini").value||"—";
-  const horaFin=document.getElementById("ev_hora_fin").value||"—";
-  const personas=document.getElementById("ev_personas").value||"—";
-  const fechaFmt=fecha?new Date(fecha+"T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):"-";
-  const today=new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+  const cliente   = document.getElementById("ev_cliente").value||"—";
+  const tipo      = document.getElementById("ev_tipo").value||"—";
+  const fecha     = document.getElementById("ev_fecha").value;
+  const lugar     = document.getElementById("ev_lugar").value||"—";
+  const horaIni   = document.getElementById("ev_hora_ini").value||"—";
+  const horaFin   = document.getElementById("ev_hora_fin").value||"—";
+  const personas  = document.getElementById("ev_personas").value||"—";
+  const telefono  = document.getElementById("ev_telefono")?document.getElementById("ev_telefono").value:"";
+  const notas     = document.getElementById("ev_notas")?document.getElementById("ev_notas").value:"";
+  const fechaFmt  = fecha?new Date(fecha+"T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):"-";
+  const today     = new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+  const folio     = "AP-"+new Date().getFullYear()+"-"+String(Date.now()).slice(-5);
+  const anticipo  = parseFloat(document.getElementById("ev_anticipo")?document.getElementById("ev_anticipo").value:50)||50;
+
   let totalRev=0;
-  const servRows=allPkgs.map(p=>{
-    const qty=quantities[p.id];
-    const price=userPrices[p.id]!==undefined?userPrices[p.id]:p.price;
-    const sub=p.fixed?price:price*qty;
-    totalRev+=sub;
+  const servRows=allPkgs.map((p,i)=>{
+    const qty   = quantities[p.id];
+    const price = userPrices[p.id]!==undefined?userPrices[p.id]:p.price;
+    const sub   = p.fixed?price:price*qty;
+    totalRev   += sub;
+    const desc  = p.desc?`<div style="font-size:.68rem;color:#666;margin-top:2px;">${escHtml(p.desc.substring(0,80))}${p.desc.length>80?'...':''}</div>`:'';
     return `<tr>
-      <td>${p.name}</td>
+      <td style="text-align:center;">${i+1}</td>
+      <td><strong>${escHtml(p.name)}</strong>${desc}</td>
       <td style="text-align:center;">${p.fixed?"Evento completo":qty+" personas"}</td>
       <td style="text-align:right;">${fmt(price)}</td>
       <td style="text-align:right;font-weight:700;">${fmt(sub)}</td>
     </tr>`;
   }).join("");
 
+  const ivaPct   = 0.16;
+  const subtotal = totalRev / (1+ivaPct);
+  const iva      = totalRev - subtotal;
+  const antMonto = totalRev * anticipo / 100;
+  const restante = totalRev - antMonto;
+  const totalLetras = numToLetras(totalRev);
+  const antLetras   = numToLetras(antMonto);
+
   document.getElementById("quote-preview").innerHTML=`
+  <div class="qp-topband"></div>
   <div class="qp-header">
     <img src="${LOGO}" alt="Alpha Producciones">
-    <div class="qp-header-text">
-      <h2>ALPHA PRODUCCIONES</h2>
+    <div class="qp-header-center">
+      <h1>ALPHA PRODUCCIONES</h1>
       <p>MONTAJE · ORGANIZACIÓN · PRODUCCIÓN DE EVENTOS</p>
-      <p style="margin-top:4px;color:#888;font-size:.72rem;">Montaje y Organización de Shows Coreográficos · Fiestas y Eventos</p>
+      <p>Shows Coreográficos · Fiestas & Eventos · Zacatecas, México</p>
     </div>
-    <div class="qp-header-contact">
-      <div>📲 492 493 8392</div>
-      <div>Zacatecas, México</div>
-      <div style="margin-top:6px;font-size:.7rem;color:#666;">Fecha: ${today}</div>
+    <div class="qp-header-right">
+      <strong>CONTRATO / COTIZACIÓN</strong>
+      Folio: <strong style="color:#e91e8c;">${folio}</strong><br>
+      Fecha: ${today}<br>
+      WhatsApp: 492 493 8392
     </div>
   </div>
+
+  <div class="qp-folio-bar">
+    <span>CONTRATO DE PRESTACIÓN DE SERVICIOS</span>
+    <span>Folio: ${folio} · Válido 15 días · IVA incluido</span>
+  </div>
+
   <div class="qp-body">
-    <div class="qp-section-title">DATOS DEL CLIENTE Y EVENTO</div>
+
+    <div class="qp-contract-title">Contrato de Prestación de Servicios para Eventos</div>
+
+    <p class="qp-contract-intro">
+      Que celebran por una parte <strong>${escHtml(cliente)}</strong>, a quien en adelante se le denominará
+      <strong>"EL CONTRATANTE"</strong>, y por la otra parte <strong>ALPHA PRODUCCIONES</strong>, representada por
+      <strong>JUANA MARÍA MARTÍNEZ SALAZAR</strong>, a quien en adelante se le nombrará <strong>"EL PRESTADOR"</strong>,
+      con base en las siguientes declaraciones y cláusulas:
+    </p>
+
+    <div class="qp-section-title">📋 DATOS DEL CLIENTE Y EVENTO</div>
     <div class="qp-client-grid">
-      <div class="qp-client-item"><div class="lbl">Cliente / Empresa</div><div class="val">${cliente}</div></div>
-      <div class="qp-client-item"><div class="lbl">Tipo de Evento</div><div class="val">${tipo}</div></div>
+      <div class="qp-client-item"><div class="lbl">Contratante</div><div class="val">${escHtml(cliente)}</div></div>
+      <div class="qp-client-item"><div class="lbl">Tipo de Evento</div><div class="val">${escHtml(tipo)}</div></div>
       <div class="qp-client-item"><div class="lbl">Fecha del Evento</div><div class="val">${fechaFmt}</div></div>
-      <div class="qp-client-item"><div class="lbl">Lugar</div><div class="val">${lugar}</div></div>
-      <div class="qp-client-item"><div class="lbl">Horario</div><div class="val">${horaIni} — ${horaFin}</div></div>
-      <div class="qp-client-item"><div class="lbl">No. de Personas</div><div class="val">${personas}</div></div>
+      <div class="qp-client-item"><div class="lbl">Lugar / Salón</div><div class="val">${escHtml(lugar)}</div></div>
+      <div class="qp-client-item"><div class="lbl">Horario del Servicio</div><div class="val">${horaIni} — ${horaFin} hrs.</div></div>
+      <div class="qp-client-item"><div class="lbl">No. de Personas</div><div class="val">${personas} personas</div></div>
+      ${telefono?`<div class="qp-client-item"><div class="lbl">Teléfono / WhatsApp</div><div class="val">${escHtml(telefono)}</div></div>`:''}
     </div>
-    <div class="qp-section-title">SERVICIOS COTIZADOS</div>
+
+    <div class="qp-section-title">📄 CLÁUSULA 1 — OBJETO DEL CONTRATO (SERVICIOS COTIZADOS)</div>
+    <p class="qp-clause-block">El CONTRATANTE encomienda al PRESTADOR y éste se obliga a prestar los servicios profesionales consistentes en los paquetes y servicios desglosados a continuación:</p>
+
     <table class="qp-services-table">
-      <thead><tr><th>SERVICIO</th><th style="text-align:center;">CANTIDAD</th><th style="text-align:right;">PRECIO UNIT</th><th style="text-align:right;">SUBTOTAL</th></tr></thead>
+      <thead><tr>
+        <th style="width:32px;text-align:center;">#</th>
+        <th>DESCRIPCIÓN DEL SERVICIO</th>
+        <th style="text-align:center;white-space:nowrap;">CANTIDAD</th>
+        <th style="text-align:right;white-space:nowrap;">PRECIO UNIT.</th>
+        <th style="text-align:right;white-space:nowrap;">SUBTOTAL</th>
+      </tr></thead>
       <tbody>
         ${servRows}
-        <tr class="qp-total-row"><td colspan="3" style="text-align:right;">TOTAL DEL EVENTO</td><td style="text-align:right;font-size:1.2rem;">${fmt(totalRev)}</td></tr>
+        <tr class="qp-subtotal-row">
+          <td colspan="4" style="text-align:right;">Subtotal (sin IVA)</td>
+          <td style="text-align:right;">${fmt(subtotal)}</td>
+        </tr>
+        <tr class="qp-subtotal-row">
+          <td colspan="4" style="text-align:right;">IVA (16%)</td>
+          <td style="text-align:right;">${fmt(iva)}</td>
+        </tr>
+        <tr class="qp-total-row">
+          <td colspan="4" style="text-align:right;letter-spacing:1px;">TOTAL DEL EVENTO</td>
+          <td style="text-align:right;font-size:1rem;">${fmt(totalRev)}</td>
+        </tr>
       </tbody>
     </table>
+
+    <p class="qp-clause-block" style="margin-top:6px;">
+      <strong>Total con letra:</strong> ${totalLetras} M/N. IVA incluido.
+    </p>
+
     <div class="qp-includes">
-      📌 <strong>INCLUYE en paquetes de comida:</strong> Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca (limón con chía y fruta de temporada)
+      📌 <strong>Incluye en paquetes de comida:</strong> Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca (limón con chía y fruta de temporada). Servicio de 2 horas. Mínimo 50 personas por paquete. Costo por persona extra: $99.00 MXN.
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
-      <div style="background:#f5f5ff;padding:8px 12px;border-radius:4px;font-size:.78rem;color:#555;">⏱️ Servicio de 2 horas · Mínimo 50 personas por paquete</div>
-      <div style="background:#f5f5ff;padding:8px 12px;border-radius:4px;font-size:.78rem;color:#555;">📅 Cotización válida por 15 días · Sujeta a disponibilidad</div>
+
+    <div class="qp-section-title">💰 CLÁUSULA 2 — FORMA DE PAGO</div>
+    <table class="qp-services-table">
+      <thead><tr>
+        <th>CONCEPTO</th><th style="text-align:right;">MONTO</th><th>VENCIMIENTO</th>
+      </tr></thead>
+      <tbody>
+        <tr class="qp-anticipo-row">
+          <td>🟢 Anticipo (${anticipo}%) — A pagar al firmar este contrato</td>
+          <td style="text-align:right;font-weight:700;color:#1b5e20;">${fmt(antMonto)}</td>
+          <td style="font-size:.72rem;">Al momento de firmar</td>
+        </tr>
+        <tr>
+          <td>🔵 Saldo restante (${100-anticipo}%) — A pagar el día del evento, antes del servicio</td>
+          <td style="text-align:right;font-weight:700;">${fmt(restante)}</td>
+          <td style="font-size:.72rem;">Día del evento</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="qp-clause-block">
+      <strong>Anticipo con letra:</strong> ${antLetras} M/N. El pago del anticipo se realiza al momento de la firma del presente contrato.
+    </p>
+
+    <div class="qp-section-title">⚖️ CLÁUSULAS GENERALES</div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 3 — VIGENCIA:</strong> El PRESTADOR se obliga a desempeñar los servicios objeto del presente contrato en forma personal e independiente, en la fecha, lugar y horario indicados en el apartado de datos del evento.
     </div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 4 — CANCELACIÓN:</strong> En caso de cancelación del evento y/o cualquier otro motivo que suspenda la actividad en la fecha acordada, <strong>no habrá reembolso</strong> de la cantidad cubierta al PRESTADOR. Solo se podrá hacer cambio de fecha siempre y cuando se informe con mínimo <strong>una semana de anticipación</strong>.
+    </div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 5 — PERSONAS ADICIONALES:</strong> En caso de requerir el servicio para más personas de las estipuladas, el CONTRATANTE se compromete a pagar el excedente con un costo de <strong>$99.00 MXN por persona extra</strong> al término del servicio.
+    </div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 6 — SEGURIDAD:</strong> El CONTRATANTE deberá brindar las condiciones adecuadas de seguridad con respecto a recurso humano, espacio físico y suministro de energía eléctrica al PRESTADOR, a fin de que se lleve a cabo el servicio en las mejores condiciones.
+    </div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 7 — CONFIDENCIALIDAD:</strong> Toda información que se suministre entre las partes será proporcionada en términos de estricta reserva y confidencialidad.
+    </div>
+    <div class="qp-clause-block">
+      <strong>CLÁUSULA 8 — DAÑOS Y PERJUICIOS:</strong> La falta de cumplimiento a cualquiera de las obligaciones aquí contraídas será motivo de rescisión del presente contrato, con el pago de daños y perjuicios que el incumplimiento cause a la contraparte.
+    </div>
+    ${notas?`<div class="qp-clause-block"><strong>NOTAS ADICIONALES:</strong> ${escHtml(notas)}</div>`:''}
+
+    <div style="text-align:center;margin:10px 0 6px;">
+      <span class="qp-stamp">Leído y aceptado de común acuerdo</span>
+    </div>
+    <p style="text-align:center;font-size:.72rem;color:#666;margin-bottom:14px;">
+      Zacatecas, Zac. a ${today}
+    </p>
+
+    <div class="qp-signatures">
+      <div class="qp-sig-block">
+        <div class="qp-sig-line"></div>
+        <div class="qp-sig-name">${escHtml(cliente)}</div>
+        <div class="qp-sig-role">"EL CONTRATANTE"</div>
+      </div>
+      <div class="qp-sig-block">
+        <div class="qp-sig-line"></div>
+        <div class="qp-sig-name">JUANA MARÍA MARTÍNEZ SALAZAR</div>
+        <div class="qp-sig-role">"EL PRESTADOR" · ALPHA PRODUCCIONES</div>
+      </div>
+    </div>
+
   </div>
+
   <div class="qp-footer">
-    <div class="qp-footer-note">Para confirmar tu evento contáctanos por WhatsApp. Esta cotización es un estimado y puede variar según disponibilidad y temporada. Precios incluyen IVA.</div>
-    <div class="qp-footer-cta">
-      <p>¡CONFIRMA TU EVENTO HOY!</p>
-      <strong>492 493 8392</strong>
-    </div>
-  </div>`;
+    <span>📲 WhatsApp: 492 493 8392 · Zacatecas, México · <strong>@AlphaProducciones</strong></span>
+    <span>Folio: <strong>${folio}</strong> · ${today}</span>
+  </div>
+  <div class="qp-bottomband"></div>`;
 
   document.getElementById("quoteModal").classList.add("open");
   if(autoSend) setTimeout(sendWhatsApp,600);
+}
+
+// ── NÚMERO A LETRAS (para contrato) ──────────────────────────────────────────
+function numToLetras(n){
+  const e=['','UN','DOS','TRES','CUATRO','CINCO','SEIS','SIETE','OCHO','NUEVE',
+           'DIEZ','ONCE','DOCE','TRECE','CATORCE','QUINCE','DIECISÉIS','DIECISIETE','DIECIOCHO','DIECINUEVE'];
+  const d=['','','VEINTE','TREINTA','CUARENTA','CINCUENTA','SESENTA','SETENTA','OCHENTA','NOVENTA'];
+  const c=['','CIENTO','DOSCIENTOS','TRESCIENTOS','CUATROCIENTOS','QUINIENTOS','SEISCIENTOS','SETECIENTOS','OCHOCIENTOS','NOVECIENTOS'];
+  function cent(n){
+    if(n===100) return 'CIEN';
+    const h=Math.floor(n/100),r=n%100;
+    if(r===0) return c[h];
+    if(r<20) return (h?c[h]+' ':'')+e[r];
+    const dz=Math.floor(r/10),un=r%10;
+    return (h?c[h]+' ':'')+d[dz]+(un?' Y '+e[un]:'');
+  }
+  n=Math.round(n*100)/100;
+  const ent=Math.floor(n);
+  const dec=Math.round((n-ent)*100);
+  if(ent===0) return 'CERO PESOS '+String(dec).padStart(2,'0')+'/100 M.N.';
+  let res='';
+  if(ent>=1000000){ res+=cent(Math.floor(ent/1000000))+' MILLÓN '; }
+  const miles=Math.floor((ent%1000000)/1000);
+  if(miles===1) res+='MIL ';
+  else if(miles>1) res+=cent(miles)+' MIL ';
+  const resto=ent%1000;
+  if(resto>0) res+=cent(resto);
+  return res.trim()+' PESOS '+String(dec).padStart(2,'0')+'/100 M.N.';
 }
 
 // ── PDF GENERATION ────────────────────────────────────────────────────────────
@@ -1805,6 +2057,39 @@ function getEffectiveIngredients(pid){
 let fbApp=null, fbDb=null, fbAuth=null, fbUser=null, fbQuotesRef=null;
 let allCloudQuotes=[];
 
+function showFbConfigError(msg){
+  const el = document.getElementById('fbParseMsg');
+  if(el){
+    el.style.display='block';
+    el.innerHTML=`<div style="background:rgba(255,82,82,.1);border:1px solid rgba(255,82,82,.3);border-radius:8px;padding:12px 14px;color:var(--red);font-size:.82rem;white-space:pre-wrap;font-family:monospace;">${escHtml(msg)}</div>`;
+  } else {
+    alert(msg);
+  }
+}
+
+function previewParsedConfig(){
+  const raw = document.getElementById('fbConfigInput').value.trim();
+  const el  = document.getElementById('fbParseMsg');
+  if(!raw){ el.style.display='none'; return; }
+  const config = parseFirebaseConfig(raw);
+  if(!config || !config.apiKey){
+    el.style.display='block';
+    el.innerHTML=`<div style="background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.25);border-radius:8px;padding:10px 12px;color:var(--red);font-size:.8rem;">⚠️ Aún no reconozco el formato — sigue pegando...</div>`;
+  } else {
+    const missing = !config.databaseURL ? '⚠️ Falta <b>databaseURL</b> — activa Realtime Database en Firebase Console' : '';
+    const fields = ['apiKey','authDomain','databaseURL','projectId','storageBucket','messagingSenderId','appId'];
+    const rows = fields.map(f=>`<tr><td style="color:var(--cyan);padding:2px 8px;font-family:monospace;font-size:.75rem;">${f}</td><td style="color:var(--green);padding:2px 8px;font-size:.75rem;">${config[f]?'✅ '+config[f]:'<span style="color:var(--muted);">—</span>'}</td></tr>`).join('');
+    el.style.display='block';
+    el.innerHTML=`
+      <div style="background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.25);border-radius:8px;padding:10px 14px;">
+        <div style="color:var(--green);font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.82rem;margin-bottom:6px;">✅ CONFIGURACIÓN DETECTADA CORRECTAMENTE</div>
+        <table style="width:100%;">${rows}</table>
+        ${missing?`<div style="margin-top:8px;padding:8px;background:rgba(255,152,0,.1);border-radius:6px;color:var(--orange);font-size:.78rem;">${missing}</div>`:''}
+      </div>`;
+  }
+}
+
+
 function showFirebaseSetup(){
   // Pre-fill from localStorage if saved
   const saved = localStorage.getItem('fbConfig');
@@ -1815,32 +2100,105 @@ function showFirebaseSetup(){
 }
 
 function parseFirebaseConfig(raw){
-  // Accept either raw JSON object or const firebaseConfig = {...}
+  // ── Strategy 1: try direct JSON parse ──────────────────────────────────────
+  try { const r = JSON.parse(raw.trim()); if(r && r.apiKey) return r; } catch(e){}
+
+  // ── Strategy 2: strip JS variable assignment ───────────────────────────────
+  // Handles: const firebaseConfig = {...};
+  //          var firebaseConfig = {...}
+  //          let firebaseConfig = {...}
+  //          firebaseConfig = {...}
+  //          const app = initializeApp({...})   ← some Firebase docs show this
+  let s = raw.trim();
+  s = s.replace(/\/\/.*$/gm, '');           // remove // comments
+  s = s.replace(/\/\*[\s\S]*?\*\//g, '');   // remove /* */ comments
   try {
-    // Strip JS assignment wrapper if present
-    let cleaned = raw.trim();
-    cleaned = cleaned.replace(/^const\s+\w+\s*=\s*/, '').replace(/;?\s*$/, '');
-    return JSON.parse(cleaned);
-  } catch(e){
-    // Try extracting JSON with regex
-    const match = raw.match(/\{[\s\S]*\}/);
-    if(match){ try{ return JSON.parse(match[0]); }catch(e2){} }
-    return null;
+    const stripped = s
+      .replace(/^(const|let|var)\s+\w+\s*=\s*/, '')
+      .replace(/^[\w]+\s*=\s*/, '')
+      .replace(/;?\s*$/, '')
+      .trim();
+    const r = JSON.parse(stripped);
+    if(r && r.apiKey) return r;
+  } catch(e){}
+
+  // ── Strategy 3: extract first {...} block and JSON-parse it ─────────────────
+  const braceMatch = s.match(/\{[\s\S]*\}/);
+  if(braceMatch){
+    try {
+      const r = JSON.parse(braceMatch[0]);
+      if(r && r.apiKey) return r;
+    } catch(e){}
   }
+
+  // ── Strategy 4: parse JS object notation (unquoted keys) ───────────────────
+  // Firebase often shows: { apiKey: "xxx", authDomain: "xxx", ... }
+  // keys are NOT quoted — standard JSON requires quoted keys
+  if(braceMatch){
+    try {
+      // Quote all unquoted keys: word chars followed by colon
+      const jsonified = braceMatch[0]
+        .replace(/([{,]\s*)([a-zA-Z_$][a-zA-Z0-9_$]*)(\s*:)/g, '$1"$2"$3')
+        .replace(/:\s*'([^']*)'/g, ': "$1"')   // single → double quotes
+        .replace(/,\s*}/g, '}');               // trailing commas
+      const r = JSON.parse(jsonified);
+      if(r && r.apiKey) return r;
+    } catch(e){}
+  }
+
+  // ── Strategy 5: extract key:value pairs with regex ──────────────────────────
+  const fields = ['apiKey','authDomain','databaseURL','projectId',
+                  'storageBucket','messagingSenderId','appId','measurementId'];
+  const result = {};
+  let found = 0;
+  fields.forEach(field => {
+    // Matches:  apiKey: "value"  OR  "apiKey": "value"  OR  apiKey: 'value'
+    const re = new RegExp(`["']?${field}["']?\\s*:\\s*["']([^"']+)["']`);
+    const m = raw.match(re);
+    if(m){ result[field] = m[1]; found++; }
+  });
+  if(found >= 3 && result.apiKey) return result;   // at least apiKey + 2 more
+
+  return null;
 }
 
 async function initFirebase(){
   const raw = document.getElementById('fbConfigInput').value.trim();
-  if(!raw){ alert('Pega tu firebaseConfig primero'); return; }
+  if(!raw){
+    showFbConfigError('Pega tu firebaseConfig primero. Lo encuentras en Firebase Console → ⚙️ Configuración del proyecto → Tu app web.');
+    return;
+  }
 
   const config = parseFirebaseConfig(raw);
   if(!config || !config.apiKey){
-    alert('❌ Formato inválido. Asegúrate de pegar el objeto firebaseConfig completo.');
+    showFbConfigError(
+      '❌ No se pudo leer el firebaseConfig.\n\n' +
+      'Asegúrate de pegar el bloque completo, por ejemplo:\n\n' +
+      'const firebaseConfig = {\n' +
+      '  apiKey: "AIzaSy...",\n' +
+      '  authDomain: "tu-app.firebaseapp.com",\n' +
+      '  databaseURL: "https://tu-app-default-rtdb.firebaseio.com",\n' +
+      '  projectId: "tu-app",\n' +
+      '  storageBucket: "tu-app.appspot.com",\n' +
+      '  messagingSenderId: "123456",\n' +
+      '  appId: "1:123456:web:abc"\n' +
+      '};'
+    );
+    return;
+  }
+
+  if(!config.databaseURL){
+    showFbConfigError(
+      '⚠️ Falta el campo "databaseURL" en tu config.\n\n' +
+      'Ve a Firebase Console → Realtime Database → copia la URL que aparece arriba (ej: https://tu-app-default-rtdb.firebaseio.com)\n\n' +
+      'Agrégala manualmente a tu config:\n  databaseURL: "https://tu-app-default-rtdb.firebaseio.com"'
+    );
     return;
   }
 
   // Save config for reuse
   localStorage.setItem('fbConfig', JSON.stringify(config));
+
 
   try {
     showLoading('CONECTANDO A FIREBASE...');
@@ -1974,8 +2332,10 @@ function updateFbStatusBar(){
   }
 }
 
+let editingQuoteId = null; // null = new, string = editing existing
+
 async function saveQuoteToCloud(){
-  if(!fbUser||!fbDb){ alert('Conéctate a Firebase primero'); return; }
+  if(!fbUser||!fbDb){ alert('Conéctate a Firebase primero (pestaña ☁️ NUBE)'); return; }
   const allPkgs=[...PACKAGES,...customPkgs].filter(p=>p.cat!=="section"&&(quantities[p.id]||0)>0);
   if(!allPkgs.length){ alert('Agrega al menos un paquete al cotizador'); return; }
 
@@ -1996,22 +2356,38 @@ async function saveQuoteToCloud(){
     horaIni:    document.getElementById('ev_hora_ini').value||'-',
     horaFin:    document.getElementById('ev_hora_fin').value||'-',
     personas:   document.getElementById('ev_personas').value||0,
+    telefono:   document.getElementById('ev_telefono')?document.getElementById('ev_telefono').value:'',
+    notas:      document.getElementById('ev_notas')?document.getElementById('ev_notas').value:'',
+    anticipo:   document.getElementById('ev_anticipo')?parseFloat(document.getElementById('ev_anticipo').value)||50:50,
     servicios:  items,
     total:      totalRev,
     costoReal:  getRealCostFromChecked(),
     ganancia:   totalRev - getRealCostFromChecked(),
-    creadoEn:   window._fbSDK.serverTimestamp(),
     creadoPor:  fbUser.email,
   };
 
   try {
     showLoading('GUARDANDO EN LA NUBE...');
-    await window._fbSDK.push(fbQuotesRef, quoteData);
+    if(editingQuoteId){
+      // UPDATE existing
+      quoteData.actualizadoEn = Date.now();
+      await window._fbSDK.set(
+        window._fbSDK.ref(fbDb,'cotizaciones/'+fbUser.uid+'/'+editingQuoteId),
+        {...(allCloudQuotes.find(q=>q.id===editingQuoteId)||{}), ...quoteData, id:undefined}
+      );
+      editingQuoteId=null;
+    } else {
+      // CREATE new
+      quoteData.creadoEn = Date.now();
+      await window._fbSDK.push(fbQuotesRef, quoteData);
+    }
     hideLoading();
     const msg = document.getElementById('fbSaveMsg');
-    msg.style.display='block';
-    msg.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada correctamente en la nube</div>';
-    setTimeout(()=>msg.style.display='none', 3500);
+    if(msg){
+      msg.style.display='block';
+      msg.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada correctamente en la nube</div>';
+      setTimeout(()=>msg.style.display='none',3500);
+    }
   } catch(e){
     hideLoading();
     alert('❌ Error al guardar: '+e.message);
@@ -2024,10 +2400,8 @@ function listenToQuotes(){
   sdk.onValue(fbQuotesRef, snap => {
     allCloudQuotes=[];
     if(snap.exists()){
-      snap.forEach(child=>{
-        allCloudQuotes.push({id:child.key, ...child.val()});
-      });
-      allCloudQuotes.reverse(); // newest first
+      snap.forEach(child=>{ allCloudQuotes.push({id:child.key, ...child.val()}); });
+      allCloudQuotes.sort((a,b)=>(b.creadoEn||0)-(a.creadoEn||0));
     }
     renderQuotesList(allCloudQuotes);
   });
@@ -2036,8 +2410,8 @@ function listenToQuotes(){
 function filterQuotes(){
   const q = document.getElementById('fbSearchInput').value.toLowerCase();
   const filtered = allCloudQuotes.filter(c=>
-    (c.cliente||'').toLowerCase().includes(q) ||
-    (c.tipoEvento||'').toLowerCase().includes(q) ||
+    (c.cliente||'').toLowerCase().includes(q)||
+    (c.tipoEvento||'').toLowerCase().includes(q)||
     (c.fecha||'').includes(q)
   );
   renderQuotesList(filtered);
@@ -2050,22 +2424,26 @@ function renderQuotesList(quotes){
     return;
   }
   container.innerHTML = quotes.map(q=>{
-    const dateStr = q.creadoEn ? new Date(q.creadoEn).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+    const ts = q.actualizadoEn||q.creadoEn;
+    const dateStr = ts ? new Date(ts).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'})+(new Date(ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})) : '-';
     const margin = q.total>0 ? ((q.ganancia/q.total)*100).toFixed(0)+'%' : '-';
-    return `<div class="quote-card" onclick="showQuoteDetail('${q.id}')">
-      <div class="quote-card-info">
+    const antiAmt = q.total*(q.anticipo||50)/100;
+    return `<div class="quote-card">
+      <div class="quote-card-info" onclick="showQuoteDetail('${q.id}')" style="cursor:pointer;">
         <div class="quote-card-name">👤 ${escHtml(q.cliente||'Sin nombre')}</div>
-        <div class="quote-card-meta">🎉 ${escHtml(q.tipoEvento||'-')} · 📅 ${escHtml(q.fecha||'-')} · 📍 ${escHtml(q.lugar||'-')} · 👥 ${q.personas||0} personas</div>
+        <div class="quote-card-meta">🎉 ${escHtml(q.tipoEvento||'-')} · 📅 ${escHtml(q.fecha||'-')} · 📍 ${escHtml((q.lugar||'-').substring(0,30))} · 👥 ${q.personas||0}p</div>
+        <div style="font-size:.72rem;color:var(--cyan);margin-top:3px;">💰 Anticipo: ${fmt(antiAmt)} · Saldo: ${fmt(q.total-antiAmt)}</div>
       </div>
-      <div style="text-align:center;">
+      <div style="text-align:center;" onclick="showQuoteDetail('${q.id}')" style="cursor:pointer;">
         <div class="quote-card-total">${fmt(q.total)}</div>
         <div style="font-size:.72rem;color:var(--green);">Margen: ${margin}</div>
       </div>
       <div class="quote-card-date">
-        <div>${dateStr}</div>
-        <div style="margin-top:6px;display:flex;gap:6px;justify-content:flex-end;">
-          <button class="btn-del-quote" onclick="event.stopPropagation();loadQuoteToEditor('${q.id}')">📂 Cargar</button>
-          <button class="btn-del-quote" onclick="event.stopPropagation();deleteCloudQuote('${q.id}')">🗑</button>
+        <div style="font-size:.7rem;">${dateStr}</div>
+        <div style="margin-top:8px;display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;">
+          <button class="btn-del-quote" style="background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.3);color:var(--cyan);" onclick="showQuoteDetail('${q.id}')">👁 Ver</button>
+          <button class="btn-del-quote" style="background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3);color:var(--gold);" onclick="editCloudQuote('${q.id}')">✏️ Editar</button>
+          <button class="btn-del-quote" onclick="deleteCloudQuote('${q.id}')">🗑</button>
         </div>
       </div>
     </div>`;
@@ -2077,71 +2455,162 @@ function showQuoteDetail(id){
   if(!q) return;
   const modal = document.getElementById('fbQuoteDetailModal');
   const content = document.getElementById('fbQuoteDetailContent');
-  const rows = (q.servicios||[]).map(s=>`
-    <tr>
-      <td>${escHtml(s.nombre)}</td>
+  // re-use openQuotePreview but for saved data — build inline
+  const fechaFmt = q.fecha&&q.fecha!=='-'?new Date(q.fecha+"T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):q.fecha||'-';
+  const today = new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+  const ts = q.actualizadoEn||q.creadoEn;
+  const savedDate = ts?new Date(ts).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}):today;
+  const folio = q.folio||("AP-"+(ts?new Date(ts).getFullYear():new Date().getFullYear())+"-"+String(id).slice(-5));
+  const anticipo = q.anticipo||50;
+  const antMonto = q.total*anticipo/100;
+  const restante = q.total-antMonto;
+  const totalLetras = numToLetras(q.total);
+  const antLetras   = numToLetras(antMonto);
+  const ivaPct=0.16, subtotal=q.total/(1+ivaPct), iva=q.total-subtotal;
+
+  const servRows=(q.servicios||[]).map((s,i)=>{
+    return `<tr>
+      <td style="text-align:center;">${i+1}</td>
+      <td><strong>${escHtml(s.nombre)}</strong></td>
       <td style="text-align:center;">${s.cantidad}</td>
       <td style="text-align:right;">${fmt(s.precio)}</td>
       <td style="text-align:right;font-weight:700;">${fmt(s.subtotal)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+
   content.innerHTML=`
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-      <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:2px;">${escHtml(q.cliente||'Sin nombre')}</div>
-        <div style="color:var(--muted);font-size:.82rem;">${escHtml(q.tipoEvento||'-')} · ${escHtml(q.fecha||'-')} · ${escHtml(q.lugar||'-')}</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green);">${fmt(q.total)}</div>
-        <div style="font-size:.75rem;color:var(--muted);">Costo real: ${fmt(q.costoReal)} · Ganancia: ${fmt(q.ganancia)}</div>
-      </div>
+  <div id="quote-preview">
+  <div class="qp-topband"></div>
+  <div class="qp-header">
+    <img src="${LOGO}" alt="Alpha Producciones">
+    <div class="qp-header-center">
+      <h1>ALPHA PRODUCCIONES</h1>
+      <p>MONTAJE · ORGANIZACIÓN · PRODUCCIÓN DE EVENTOS</p>
+      <p>Shows Coreográficos · Fiestas & Eventos · Zacatecas, México</p>
     </div>
-    <table style="width:100%;border-collapse:collapse;">
-      <thead><tr style="background:var(--card2);">
-        <th style="padding:8px 10px;text-align:left;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;">SERVICIO</th>
-        <th style="padding:8px 10px;text-align:center;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">CANT.</th>
-        <th style="padding:8px 10px;text-align:right;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">PRECIO</th>
-        <th style="padding:8px 10px;text-align:right;font-family:'Rajdhani',sans-serif;font-size:.75rem;color:var(--gold);">SUBTOTAL</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
+    <div class="qp-header-right">
+      <strong>CONTRATO / COTIZACIÓN</strong>
+      Folio: <strong style="color:#e91e8c;">${folio}</strong><br>
+      Fecha: ${savedDate}<br>
+      WhatsApp: 492 493 8392
+    </div>
+  </div>
+  <div class="qp-folio-bar">
+    <span>CONTRATO DE PRESTACIÓN DE SERVICIOS</span>
+    <span>Folio: ${folio} · Válido 15 días · IVA incluido</span>
+  </div>
+  <div class="qp-body">
+    <div class="qp-contract-title">Contrato de Prestación de Servicios para Eventos</div>
+    <p class="qp-contract-intro">
+      Que celebran por una parte <strong>${escHtml(q.cliente||'—')}</strong>, a quien en adelante se le denominará
+      <strong>"EL CONTRATANTE"</strong>, y por la otra parte <strong>ALPHA PRODUCCIONES</strong>, representada por
+      <strong>JUANA MARÍA MARTÍNEZ SALAZAR</strong>, a quien en adelante se le nombrará <strong>"EL PRESTADOR"</strong>,
+      con base en las siguientes declaraciones y cláusulas:
+    </p>
+    <div class="qp-section-title">📋 DATOS DEL CLIENTE Y EVENTO</div>
+    <div class="qp-client-grid">
+      <div class="qp-client-item"><div class="lbl">Contratante</div><div class="val">${escHtml(q.cliente||'—')}</div></div>
+      <div class="qp-client-item"><div class="lbl">Tipo de Evento</div><div class="val">${escHtml(q.tipoEvento||'—')}</div></div>
+      <div class="qp-client-item"><div class="lbl">Fecha del Evento</div><div class="val">${fechaFmt}</div></div>
+      <div class="qp-client-item"><div class="lbl">Lugar / Salón</div><div class="val">${escHtml(q.lugar||'—')}</div></div>
+      <div class="qp-client-item"><div class="lbl">Horario del Servicio</div><div class="val">${q.horaIni||'—'} — ${q.horaFin||'—'} hrs.</div></div>
+      <div class="qp-client-item"><div class="lbl">No. de Personas</div><div class="val">${q.personas||'—'} personas</div></div>
+      ${q.telefono?`<div class="qp-client-item"><div class="lbl">Teléfono</div><div class="val">${escHtml(q.telefono)}</div></div>`:''}
+    </div>
+    <div class="qp-section-title">📄 SERVICIOS COTIZADOS</div>
+    <table class="qp-services-table">
+      <thead><tr><th style="width:32px;text-align:center;">#</th><th>SERVICIO</th><th style="text-align:center;">CANTIDAD</th><th style="text-align:right;">PRECIO UNIT.</th><th style="text-align:right;">SUBTOTAL</th></tr></thead>
+      <tbody>
+        ${servRows}
+        <tr class="qp-subtotal-row"><td colspan="4" style="text-align:right;">Subtotal (sin IVA)</td><td style="text-align:right;">${fmt(subtotal)}</td></tr>
+        <tr class="qp-subtotal-row"><td colspan="4" style="text-align:right;">IVA (16%)</td><td style="text-align:right;">${fmt(iva)}</td></tr>
+        <tr class="qp-total-row"><td colspan="4" style="text-align:right;letter-spacing:1px;">TOTAL DEL EVENTO</td><td style="text-align:right;">${fmt(q.total)}</td></tr>
+      </tbody>
     </table>
-    <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
-      <button class="btn btn-cyan" onclick="loadQuoteToEditor('${q.id}');document.getElementById('fbQuoteDetailModal').classList.remove('open')">📂 Cargar en Cotizador</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('fbQuoteDetailModal').classList.remove('open')">Cerrar</button>
-    </div>`;
+    <p class="qp-clause-block"><strong>Total con letra:</strong> ${totalLetras}</p>
+    <div class="qp-includes">📌 Incluye en paquetes de comida: Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca. Servicio 2 horas. Mínimo 50 personas. Persona extra: $99 MXN.</div>
+    <div class="qp-section-title">💰 FORMA DE PAGO</div>
+    <table class="qp-services-table">
+      <thead><tr><th>CONCEPTO</th><th style="text-align:right;">MONTO</th><th>VENCIMIENTO</th></tr></thead>
+      <tbody>
+        <tr class="qp-anticipo-row"><td>🟢 Anticipo (${anticipo}%)</td><td style="text-align:right;font-weight:700;color:#1b5e20;">${fmt(antMonto)}</td><td style="font-size:.72rem;">Al firmar</td></tr>
+        <tr><td>🔵 Saldo restante (${100-anticipo}%)</td><td style="text-align:right;font-weight:700;">${fmt(restante)}</td><td style="font-size:.72rem;">Día del evento</td></tr>
+      </tbody>
+    </table>
+    <p class="qp-clause-block"><strong>Anticipo con letra:</strong> ${antLetras}</p>
+    <div class="qp-section-title">⚖️ CLÁUSULAS GENERALES</div>
+    <div class="qp-clause-block"><strong>CANCELACIÓN:</strong> No habrá reembolso del anticipo. Cambio de fecha con mínimo 1 semana de anticipación.</div>
+    <div class="qp-clause-block"><strong>PERSONAS ADICIONALES:</strong> $99.00 MXN por persona extra al término del servicio.</div>
+    <div class="qp-clause-block"><strong>SEGURIDAD:</strong> El CONTRATANTE deberá brindar condiciones adecuadas de seguridad, espacio físico y energía eléctrica.</div>
+    <div class="qp-clause-block"><strong>DAÑOS Y PERJUICIOS:</strong> El incumplimiento será motivo de rescisión con pago de daños y perjuicios.</div>
+    ${q.notas?`<div class="qp-clause-block"><strong>NOTAS:</strong> ${escHtml(q.notas)}</div>`:''}
+    <div style="text-align:center;margin:10px 0 6px;"><span class="qp-stamp">Leído y aceptado de común acuerdo</span></div>
+    <p style="text-align:center;font-size:.72rem;color:#666;margin-bottom:14px;">Zacatecas, Zac. a ${savedDate}</p>
+    <div class="qp-signatures">
+      <div class="qp-sig-block"><div class="qp-sig-line"></div><div class="qp-sig-name">${escHtml(q.cliente||'—')}</div><div class="qp-sig-role">"EL CONTRATANTE"</div></div>
+      <div class="qp-sig-block"><div class="qp-sig-line"></div><div class="qp-sig-name">JUANA MARÍA MARTÍNEZ SALAZAR</div><div class="qp-sig-role">"EL PRESTADOR" · ALPHA PRODUCCIONES</div></div>
+    </div>
+  </div>
+  <div class="qp-footer"><span>📲 WhatsApp: 492 493 8392 · Zacatecas, México</span><span>Folio: <strong>${folio}</strong> · ${savedDate}</span></div>
+  <div class="qp-bottomband"></div>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+    <button class="btn btn-gold" onclick="downloadPDF()">⬇ Descargar PDF</button>
+    <button class="btn btn-wpp" onclick="sendWhatsApp()">📲 WhatsApp</button>
+    <button class="btn btn-gold" style="background:linear-gradient(135deg,#ff9800,#e65100);" onclick="editCloudQuote('${q.id}');document.getElementById('fbQuoteDetailModal').classList.remove('open')">✏️ Editar</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('fbQuoteDetailModal').classList.remove('open')">Cerrar</button>
+  </div>`;
   modal.classList.add('open');
 }
 
-function loadQuoteToEditor(id){
+function editCloudQuote(id){
   const q = allCloudQuotes.find(x=>x.id===id);
   if(!q) return;
-  // Fill event data
-  document.getElementById('ev_cliente').value  = q.cliente||'';
-  document.getElementById('ev_tipo').value      = q.tipoEvento||'';
-  document.getElementById('ev_fecha').value     = q.fecha||'';
-  document.getElementById('ev_lugar').value     = q.lugar||'';
-  document.getElementById('ev_hora_ini').value  = q.horaIni||'';
-  document.getElementById('ev_hora_fin').value  = q.horaFin||'';
-  document.getElementById('ev_personas').value  = q.personas||100;
-  // Load quantities
+  editingQuoteId = id;
+  // Fill cotizador with saved data
+  document.getElementById('ev_cliente').value   = q.cliente||'';
+  document.getElementById('ev_tipo').value       = q.tipoEvento||'';
+  document.getElementById('ev_fecha').value      = q.fecha&&q.fecha!=='-'?q.fecha:'';
+  document.getElementById('ev_lugar').value      = q.lugar||'';
+  document.getElementById('ev_hora_ini').value   = q.horaIni&&q.horaIni!=='-'?q.horaIni:'';
+  document.getElementById('ev_hora_fin').value   = q.horaFin&&q.horaFin!=='-'?q.horaFin:'';
+  document.getElementById('ev_personas').value   = q.personas||100;
+  if(document.getElementById('ev_telefono')) document.getElementById('ev_telefono').value = q.telefono||'';
+  if(document.getElementById('ev_notas'))    document.getElementById('ev_notas').value    = q.notas||'';
+  if(document.getElementById('ev_anticipo')) document.getElementById('ev_anticipo').value = q.anticipo||50;
   quantities={};
   (q.servicios||[]).forEach(s=>{
     const found=[...PACKAGES,...customPkgs].find(p=>p.name===s.nombre);
-    if(found) quantities[found.id]=typeof s.cantidad==='number'?s.cantidad:(found.fixed?1:s.cantidad);
+    if(found) quantities[found.id]=typeof s.cantidad==='number'?s.cantidad:(found.fixed?1:parseInt(s.cantidad)||0);
   });
   recalcAll();
+  // Show editing indicator
+  const saveBtn = document.querySelector('[onclick="saveQuoteToCloud()"]');
+  if(saveBtn){
+    saveBtn.textContent='💾 Actualizar Cotización #'+id.slice(-4);
+    saveBtn.style.background='linear-gradient(135deg,#ff9800,#e65100)';
+  }
   // Switch to cotizador tab
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-cotizador').classList.add('active');
   document.querySelector('.tab-btn').classList.add('active');
+  // Notify
+  alert('✅ Cotización cargada para edición.\n\nModifica los datos y servicios, luego clic en "💾 Actualizar Cotización" en la pestaña NUBE para guardar los cambios.');
 }
+
+function loadQuoteToEditor(id){ editCloudQuote(id); }
 
 async function deleteCloudQuote(id){
   if(!fbDb||!fbUser) return;
-  if(!confirm('¿Eliminar esta cotización de la nube?')) return;
+  const q = allCloudQuotes.find(x=>x.id===id);
+  const name = q?q.cliente:'esta cotización';
+  if(!confirm(`¿Eliminar definitivamente la cotización de "${name}"?\n\nEsta acción NO se puede deshacer.`)) return;
   try {
+    showLoading('ELIMINANDO...');
     await window._fbSDK.remove(window._fbSDK.ref(fbDb,'cotizaciones/'+fbUser.uid+'/'+id));
-  } catch(e){ alert('Error al eliminar: '+e.message); }
+    hideLoading();
+  } catch(e){ hideLoading(); alert('Error al eliminar: '+e.message); }
 }
 
 function toggleStep(n){
