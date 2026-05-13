@@ -208,7 +208,22 @@ select option { background:var(--card); }
 .profit-cell.neg { color:var(--red); }
 .fixed-badge { font-size:.7rem; padding:2px 6px; border-radius:20px; background:rgba(255,215,0,.15); color:var(--gold); font-family:'Rajdhani',sans-serif; }
 
-/* ── BUTTONS ── */
+/* ── CRUD BAR — siempre visible ── */
+.crud-bar {
+  margin-top:16px; padding:16px 20px;
+  background:linear-gradient(135deg,var(--card),var(--card2));
+  border:1px solid rgba(0,230,118,.25); border-radius:var(--radius);
+  display:flex; flex-direction:column; gap:10px;
+}
+.crud-bar-title {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--green);
+}
+.crud-bar-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.crud-conn-off { font-size:.75rem; color:var(--muted); font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:1px; }
+.crud-conn-on  { font-size:.75rem; color:var(--green); font-family:'Rajdhani',sans-serif; font-weight:600; letter-spacing:1px; }
+.btn-orange { background:linear-gradient(135deg,#ff9800,#e65100); color:#fff; box-shadow:0 4px 20px rgba(255,152,0,.3); }
+.btn-green  { background:linear-gradient(135deg,var(--green),#007a40); color:#000; box-shadow:0 4px 20px rgba(0,230,118,.3); }
 .btn {
   display:inline-flex; align-items:center; gap:8px; padding:12px 24px;
   border:none; border-radius:var(--radius-sm); font-family:'Rajdhani',sans-serif;
@@ -699,7 +714,33 @@ select option { background:var(--card); }
   <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
     <button class="btn btn-ghost" onclick="clearAll()">🗑️ Limpiar Todo</button>
     <button class="btn btn-pink" onclick="document.getElementById('addPkgModal').classList.add('open')">➕ Agregar Paquete</button>
-    <button class="btn btn-gold" onclick="openQuotePreview()">📄 Generar Cotización PDF</button>
+    <button class="btn btn-gold" onclick="openQuotePreview()">📄 Ver Contrato / Cotización</button>
+  </div>
+
+  <!-- ── CRUD BUTTONS — siempre visibles ── -->
+  <div class="crud-bar" id="crudBar">
+    <div class="crud-bar-title">
+      <span id="crudEditLabel">💾 GUARDAR EN NUBE</span>
+      <span id="crudConnStatus" class="crud-conn-off">● Sin conectar</span>
+    </div>
+    <div class="crud-bar-btns">
+      <button class="btn btn-green"  id="btnGuardar"    onclick="saveQuoteToCloud()">
+        <span>☁️</span> Guardar Nueva
+      </button>
+      <button class="btn btn-orange" id="btnActualizar" onclick="saveQuoteToCloud()" style="display:none;">
+        <span>✏️</span> Actualizar
+      </button>
+      <button class="btn btn-ghost"  id="btnCancelarEdit" onclick="cancelEdit()" style="display:none;">
+        ✕ Cancelar edición
+      </button>
+      <button class="btn btn-cyan"   onclick="showTab('nube', document.getElementById('tabNube'))">
+        📁 Ver Guardadas
+      </button>
+      <button class="btn btn-ghost"  onclick="showFirebaseSetup()" id="btnConectar">
+        ⚙️ Conectar Firebase
+      </button>
+    </div>
+    <div id="crudSaveMsg" style="display:none;margin-top:10px;width:100%;"></div>
   </div>
 
 </div>
@@ -2348,32 +2389,71 @@ function updateFbStatusBar(){
   const actionBtns = document.getElementById('fbActionBtns');
   if(fbUser){
     setFbStatus('connected','Conectado a Firebase');
-    userInfo.style.display='block';
-    userInfo.innerHTML=`👤 ${fbUser.email}`;
-    actionBtns.innerHTML=`<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" onclick="fbLogout()">🚪 Cerrar sesión</button>`;
+    if(userInfo){ userInfo.style.display='block'; userInfo.innerHTML=`👤 ${fbUser.email}`; }
+    if(actionBtns) actionBtns.innerHTML=`<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" onclick="fbLogout()">🚪 Cerrar sesión</button>`;
     document.getElementById('fbDashboard').style.display='block';
     document.getElementById('fbGuideSection').style.display='none';
-    // Update tab indicator
     document.getElementById('tabNube').textContent='☁️ NUBE ✅';
   } else if(fbApp){
     setFbStatus('connecting','Firebase iniciado — inicia sesión');
-    userInfo.style.display='none';
-    actionBtns.innerHTML=`<button class="btn btn-pink" style="font-size:.78rem;padding:6px 12px;" onclick="showFirebaseSetup()">🔑 Iniciar sesión</button>`;
+    if(userInfo) userInfo.style.display='none';
+    if(actionBtns) actionBtns.innerHTML=`<button class="btn btn-pink" style="font-size:.78rem;padding:6px 12px;" onclick="showFirebaseSetup()">🔑 Iniciar sesión</button>`;
     document.getElementById('fbDashboard').style.display='none';
     document.getElementById('fbGuideSection').style.display='block';
   } else {
     setFbStatus('disconnected','Sin configurar');
-    userInfo.style.display='none';
-    actionBtns.innerHTML='';
+    if(userInfo) userInfo.style.display='none';
+    if(actionBtns) actionBtns.innerHTML='';
+  }
+  updateCrudBar();
+}
+
+let editingQuoteId = null;
+
+function updateCrudBar(){
+  const connStatus = document.getElementById('crudConnStatus');
+  const btnConectar = document.getElementById('btnConectar');
+  const btnGuardar  = document.getElementById('btnGuardar');
+  const btnAct  = document.getElementById('btnActualizar');
+  const btnCan  = document.getElementById('btnCancelarEdit');
+  const lbl     = document.getElementById('crudEditLabel');
+  const bar     = document.getElementById('crudBar');
+  if(fbUser){
+    if(connStatus){ connStatus.textContent='● '+fbUser.email; connStatus.className='crud-conn-on'; }
+    if(btnConectar) btnConectar.style.display='none';
+  } else {
+    if(connStatus){ connStatus.textContent='● Sin conectar — clic en Conectar Firebase'; connStatus.className='crud-conn-off'; }
+    if(btnConectar) btnConectar.style.display='';
+  }
+  if(editingQuoteId){
+    if(lbl) lbl.textContent='✏️ MODO EDICIÓN — Cotización #'+editingQuoteId.slice(-4);
+    if(btnGuardar) btnGuardar.style.display='none';
+    if(btnAct){ btnAct.style.display=''; btnAct.innerHTML='✏️ Actualizar #'+editingQuoteId.slice(-4); }
+    if(btnCan)  btnCan.style.display='';
+    if(bar) bar.style.borderColor='rgba(255,152,0,.6)';
+  } else {
+    if(lbl) lbl.textContent='💾 GUARDAR EN NUBE';
+    if(fbUser && btnGuardar) btnGuardar.style.display='';
+    if(!fbUser && btnGuardar) btnGuardar.style.display='none';
+    if(btnAct) btnAct.style.display='none';
+    if(btnCan) btnCan.style.display='none';
+    if(bar) bar.style.borderColor='rgba(0,230,118,.25)';
   }
 }
 
-let editingQuoteId = null; // null = new, string = editing existing
+function cancelEdit(){
+  editingQuoteId=null;
+  updateCrudBar();
+}
 
 async function saveQuoteToCloud(){
-  if(!fbUser||!fbDb){ alert('Conéctate a Firebase primero (pestaña ☁️ NUBE)'); return; }
+  if(!fbUser||!fbDb){
+    showFirebaseSetup();
+    alert('Conecta Firebase primero.\nPega tu firebaseConfig, crea tu usuario y clic en "Conectar".');
+    return;
+  }
   const allPkgs=[...PACKAGES,...customPkgs].filter(p=>p.cat!=="section"&&(quantities[p.id]||0)>0);
-  if(!allPkgs.length){ alert('Agrega al menos un paquete al cotizador'); return; }
+  if(!allPkgs.length){ alert('Agrega al menos un paquete con personas al cotizador'); return; }
 
   let totalRev=0;
   const items=allPkgs.map(p=>{
@@ -2403,27 +2483,29 @@ async function saveQuoteToCloud(){
   };
 
   try {
-    showLoading('GUARDANDO EN LA NUBE...');
+    showLoading(editingQuoteId?'ACTUALIZANDO EN LA NUBE...':'GUARDANDO EN LA NUBE...');
     if(editingQuoteId){
-      // UPDATE existing
       quoteData.actualizadoEn = Date.now();
+      quoteData.creadoEn = (allCloudQuotes.find(q=>q.id===editingQuoteId)||{}).creadoEn||Date.now();
       await window._fbSDK.set(
         window._fbSDK.ref(fbDb,'cotizaciones/'+fbUser.uid+'/'+editingQuoteId),
-        {...(allCloudQuotes.find(q=>q.id===editingQuoteId)||{}), ...quoteData, id:undefined}
+        quoteData
       );
       editingQuoteId=null;
     } else {
-      // CREATE new
       quoteData.creadoEn = Date.now();
       await window._fbSDK.push(fbQuotesRef, quoteData);
     }
     hideLoading();
-    const msg = document.getElementById('fbSaveMsg');
-    if(msg){
-      msg.style.display='block';
-      msg.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada correctamente en la nube</div>';
-      setTimeout(()=>msg.style.display='none',3500);
-    }
+    updateCrudBar();
+    const showMsg=(el)=>{
+      if(!el) return;
+      el.style.display='block';
+      el.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada en la nube ☁️</div>';
+      setTimeout(()=>el.style.display='none',3500);
+    };
+    showMsg(document.getElementById('crudSaveMsg'));
+    showMsg(document.getElementById('fbSaveMsg'));
   } catch(e){
     hideLoading();
     alert('❌ Error al guardar: '+e.message);
@@ -2620,19 +2702,12 @@ function editCloudQuote(id){
     if(found) quantities[found.id]=typeof s.cantidad==='number'?s.cantidad:(found.fixed?1:parseInt(s.cantidad)||0);
   });
   recalcAll();
-  // Show editing indicator
-  const saveBtn = document.querySelector('[onclick="saveQuoteToCloud()"]');
-  if(saveBtn){
-    saveBtn.textContent='💾 Actualizar Cotización #'+id.slice(-4);
-    saveBtn.style.background='linear-gradient(135deg,#ff9800,#e65100)';
-  }
+  updateCrudBar();
   // Switch to cotizador tab
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-cotizador').classList.add('active');
   document.querySelector('.tab-btn').classList.add('active');
-  // Notify
-  alert('✅ Cotización cargada para edición.\n\nModifica los datos y servicios, luego clic en "💾 Actualizar Cotización" en la pestaña NUBE para guardar los cambios.');
 }
 
 function loadQuoteToEditor(id){ editCloudQuote(id); }
@@ -2694,6 +2769,7 @@ function showTab(id,btn){
 buildTable();
 buildServiceCards();
 updateProfitability();
+updateCrudBar();
 
 // Close modals on overlay click
 document.getElementById("quoteModal").addEventListener("click",function(e){if(e.target===this)closeModal();});
