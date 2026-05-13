@@ -1700,29 +1700,65 @@ function numToLetras(n){
   return res.trim()+' PESOS '+String(dec).padStart(2,'0')+'/100 M.N.';
 }
 
-// ── PDF GENERATION ────────────────────────────────────────────────────────────
+// ── PDF GENERATION — multi-página tamaño carta ────────────────────────────────
 async function downloadPDF(){
   showLoading("GENERANDO PDF...");
-  await new Promise(r=>setTimeout(r,200));
+  await new Promise(r=>setTimeout(r,300));
   try{
-    const el=document.getElementById("quote-preview");
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:"#ffffff",logging:false});
-    const imgData=canvas.toDataURL("image/jpeg",0.92);
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
-    const pW=pdf.internal.pageSize.getWidth();
-    const pH=pdf.internal.pageSize.getHeight();
-    const ratio=canvas.width/canvas.height;
-    let imgW=pW-20;
-    let imgH=imgW/ratio;
-    if(imgH>pH-20){imgH=pH-20;imgW=imgH*ratio;}
-    const x=(pW-imgW)/2;
-    pdf.addImage(imgData,"JPEG",x,10,imgW,imgH);
-    const cliente=document.getElementById("ev_cliente").value||"cliente";
-    const fecha=document.getElementById("ev_fecha").value||new Date().toISOString().split("T")[0];
-    pdf.save(`AlphaProducciones_Cotizacion_${cliente.replace(/\s+/g,"_")}_${fecha}.pdf`);
+    const el = document.getElementById("quote-preview");
+    if(!el){ hideLoading(); alert("Abre primero la vista previa del contrato"); return; }
+
+    // Render at high resolution
+    const canvas = await html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      allowTaint: true,
+      scrollX: 0, scrollY: 0,
+      windowWidth: 816   // carta px width at 96dpi
+    });
+
+    const {jsPDF} = window.jspdf;
+    // Carta = 215.9 × 279.4 mm
+    const pageW = 215.9, pageH = 279.4;
+    const margin = 10; // mm each side
+    const printW = pageW - margin * 2;
+
+    // img dimensions in mm
+    const imgW = printW;
+    const imgH = (canvas.height / canvas.width) * imgW;
+
+    const pdf = new jsPDF({ orientation:"portrait", unit:"mm", format:[pageW, pageH] });
+
+    // How many pages?
+    const usableH = pageH - margin * 2;
+    const totalPages = Math.ceil(imgH / usableH);
+
+    for(let page = 0; page < totalPages; page++){
+      if(page > 0) pdf.addPage([pageW, pageH]);
+
+      // Crop canvas slice for this page
+      const srcY  = (page * usableH / imgH) * canvas.height;
+      const srcH  = Math.min((usableH / imgH) * canvas.height, canvas.height - srcY);
+
+      const slice = document.createElement("canvas");
+      slice.width  = canvas.width;
+      slice.height = Math.ceil(srcH);
+      const ctx = slice.getContext("2d");
+      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+
+      const sliceImg = slice.toDataURL("image/jpeg", 0.93);
+      const sliceH   = (slice.height / canvas.width) * imgW;
+
+      pdf.addImage(sliceImg, "JPEG", margin, margin, imgW, sliceH);
+    }
+
+    const cliente = document.getElementById("ev_cliente").value||"cliente";
+    const fecha   = document.getElementById("ev_fecha").value||new Date().toISOString().split("T")[0];
+    pdf.save(`AlphaProducciones_Contrato_${cliente.replace(/\s+/g,"_")}_${fecha}.pdf`);
     hideLoading();
-  }catch(e){hideLoading();alert("Error generando PDF: "+e.message);}
+  } catch(e){ hideLoading(); alert("Error generando PDF: "+e.message); }
 }
 
 // ── WHATSAPP ──────────────────────────────────────────────────────────────────
