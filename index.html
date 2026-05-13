@@ -1741,65 +1741,379 @@ function numToLetras(n){
   return res.trim()+' PESOS '+String(dec).padStart(2,'0')+'/100 M.N.';
 }
 
-// ── PDF GENERATION — multi-página tamaño carta ────────────────────────────────
+// ── PDF GENERATION — jsPDF nativo, tamaño carta, multi-página ────────────────
 async function downloadPDF(){
+  const el = document.getElementById("quote-preview");
+  if(!el || !el.textContent.trim()){
+    alert("Abre primero la vista previa del contrato (botón 📄 Ver Contrato)");
+    return;
+  }
   showLoading("GENERANDO PDF...");
-  await new Promise(r=>setTimeout(r,300));
-  try{
-    const el = document.getElementById("quote-preview");
-    if(!el){ hideLoading(); alert("Abre primero la vista previa del contrato"); return; }
+  await new Promise(r=>setTimeout(r,200));
 
-    // Render at high resolution
-    const canvas = await html2canvas(el, {
-      scale: 3,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      logging: false,
-      allowTaint: true,
-      scrollX: 0, scrollY: 0,
-      windowWidth: 816   // carta px width at 96dpi
+  try{
+    // ── Read data from preview element ──────────────────────────────────────
+    const get = (sel, attr='textContent') => {
+      const e = el.querySelector(sel);
+      return e ? e[attr].trim() : '';
+    };
+
+    // Gather all data needed
+    const allPkgs=[...PACKAGES,...customPkgs].filter(p=>p.cat!=="section"&&(quantities[p.id]||0)>0);
+    const cliente   = document.getElementById('ev_cliente').value||'—';
+    const tipo      = document.getElementById('ev_tipo').value||'—';
+    const fecha     = document.getElementById('ev_fecha').value;
+    const lugar     = document.getElementById('ev_lugar').value||'—';
+    const horaIni   = document.getElementById('ev_hora_ini').value||'—';
+    const horaFin   = document.getElementById('ev_hora_fin').value||'—';
+    const personas  = document.getElementById('ev_personas').value||'—';
+    const telefono  = document.getElementById('ev_telefono')?document.getElementById('ev_telefono').value:'';
+    const notas     = document.getElementById('ev_notas')?document.getElementById('ev_notas').value:'';
+    const anticipo  = parseFloat(document.getElementById('ev_anticipo')?document.getElementById('ev_anticipo').value:50)||50;
+    const fechaFmt  = fecha?new Date(fecha+"T12:00:00").toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"}):"-";
+    const today     = new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+    const folio     = "AP-"+new Date().getFullYear()+"-"+String(Date.now()).slice(-5);
+
+    let totalRev=0;
+    const items=allPkgs.map(p=>{
+      const qty=quantities[p.id]; const price=userPrices[p.id]!==undefined?userPrices[p.id]:p.price;
+      const sub=p.fixed?price:price*qty; totalRev+=sub;
+      return {name:p.name, desc:(p.desc||'').substring(0,90), qty:p.fixed?'Evento completo':qty+' personas', price, sub};
+    });
+    const ivaPct=0.16, subtotal=totalRev/(1+ivaPct), iva=totalRev-subtotal;
+    const antMonto=totalRev*anticipo/100, restante=totalRev-antMonto;
+    const totalLetras=numToLetras(totalRev), antLetras=numToLetras(antMonto);
+
+    // ── jsPDF setup ─────────────────────────────────────────────────────────
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'letter' });
+    // Letter = 215.9 × 279.4 mm
+    const PW=215.9, PH=279.4, ML=14, MR=14, MT=12, MB=16;
+    const CW = PW - ML - MR;  // content width = 187.9mm
+
+    // Colors
+    const DARK=[26,26,46], PINK=[233,30,140], GOLD=[180,130,0],
+          GRAY=[120,120,130], LGRAY=[235,235,240], GREEN=[15,110,86],
+          WHITE=[255,255,255], BLACK=[30,30,30], BGGREEN=[225,245,235];
+
+    let y = MT; // current Y position
+    let page = 1;
+
+    const logoB64 = LOGO; // already have it
+
+    // Helper: check if we need new page
+    const needPage = (needed) => {
+      if(y + needed > PH - MB){
+        // Draw footer on current page
+        drawFooter();
+        doc.addPage('letter');
+        page++;
+        y = MT;
+        return true;
+      }
+      return false;
+    };
+
+    const drawFooter = () => {
+      const fy = PH - MB + 3;
+      doc.setFillColor(...DARK); doc.rect(ML-2, fy-3, PW-ML-MR+4, 7, 'F');
+      doc.setFontSize(7); doc.setTextColor(...LGRAY);
+      doc.text(`📲 WhatsApp: 492 493 8392 · Zacatecas, México · @AlphaProducciones`, ML, fy+1);
+      doc.setTextColor(...[255,215,0]);
+      doc.text(`Folio: ${folio} · ${today}`, PW-MR, fy+1, {align:'right'});
+      // bottom pink line
+      doc.setFillColor(...PINK); doc.rect(ML-2, PH-MB+4.5, PW-ML-MR+4, 1.2, 'F');
+    };
+
+    const drawSectionBand = (txt) => {
+      needPage(10);
+      doc.setFillColor(...DARK); doc.rect(ML, y, CW, 7, 'F');
+      doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.setTextColor(...GOLD);
+      doc.text(txt.toUpperCase(), ML+3, y+4.8);
+      y += 9;
+    };
+
+    const wrapText = (txt, maxW, fontSize) => {
+      doc.setFontSize(fontSize);
+      return doc.splitTextToSize(txt, maxW);
+    };
+
+    // ── 1. TOP BAND ─────────────────────────────────────────────────────────
+    doc.setFillColor(...DARK); doc.rect(0, 0, PW, 3, 'F');
+
+    // ── 2. HEADER ───────────────────────────────────────────────────────────
+    // Logo
+    try { doc.addImage(logoB64, 'JPEG', ML, y, 22, 17); } catch(e){}
+
+    // Company name & tagline (center)
+    doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.setTextColor(...DARK);
+    doc.text('ALPHA PRODUCCIONES', PW/2, y+8, {align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+    doc.text('MONTAJE · ORGANIZACIÓN · PRODUCCIÓN DE EVENTOS', PW/2, y+13, {align:'center'});
+    doc.text('Shows Coreográficos · Fiestas & Eventos · Zacatecas, México', PW/2, y+17, {align:'center'});
+
+    // Right: folio/date
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+    doc.text('CONTRATO / COTIZACIÓN', PW-MR, y+4, {align:'right'});
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...GRAY);
+    doc.text('Folio:', PW-MR, y+9, {align:'right'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...PINK);
+    doc.text(folio, PW-MR, y+14, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...GRAY);
+    doc.text(`Fecha: ${today}`, PW-MR, y+19, {align:'right'});
+    doc.text('WhatsApp: 492 493 8392', PW-MR, y+23, {align:'right'});
+
+    y += 22;
+
+    // Header bottom line
+    doc.setDrawColor(...DARK); doc.setLineWidth(0.5); doc.line(ML, y, PW-MR, y);
+    y += 4;
+
+    // ── 3. FOLIO BAR ─────────────────────────────────────────────────────────
+    doc.setFillColor(...DARK); doc.rect(ML, y, CW, 6.5, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(...GOLD);
+    doc.text('CONTRATO DE PRESTACIÓN DE SERVICIOS', ML+3, y+4.2);
+    doc.setTextColor(...LGRAY);
+    doc.text(`Folio: ${folio} · VÁLIDO 15 DÍAS · IVA INCLUIDO`, PW-MR, y+4.2, {align:'right'});
+    y += 10;
+
+    // ── 4. CONTRACT TITLE ─────────────────────────────────────────────────────
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...DARK);
+    doc.text('CONTRATO DE PRESTACIÓN DE SERVICIOS PARA EVENTOS', PW/2, y, {align:'center'});
+    y += 3;
+    doc.setDrawColor(...LGRAY); doc.setLineWidth(0.3); doc.line(ML, y, PW-MR, y);
+    y += 5;
+
+    // ── 5. INTRO PARAGRAPH ───────────────────────────────────────────────────
+    const introText = `Que celebran por una parte ${cliente.toUpperCase()}, a quien en adelante se le denominará "EL CONTRATANTE", y por la otra parte ALPHA PRODUCCIONES, representada por JUANA MARÍA MARTÍNEZ SALAZAR, a quien en adelante se le nombrará "EL PRESTADOR", con base en las siguientes declaraciones y cláusulas:`;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(...BLACK);
+    const introLines = wrapText(introText, CW);
+    introLines.forEach(ln => { needPage(5); doc.text(ln, ML, y); y+=4.5; });
+    y += 3;
+
+    // ── 6. CLIENT DATA ────────────────────────────────────────────────────────
+    drawSectionBand('📋  DATOS DEL CLIENTE Y EVENTO');
+
+    const fields = [
+      ['CONTRATANTE', cliente, 'TIPO DE EVENTO', tipo],
+      ['FECHA DEL EVENTO', fechaFmt, 'LUGAR / SALÓN', lugar],
+      ['HORARIO DEL SERVICIO', `${horaIni} — ${horaFin} hrs.`, 'NO. DE PERSONAS', `${personas} personas`],
+    ];
+    if(telefono) fields.push(['TELÉFONO / WHATSAPP', telefono, '', '']);
+
+    const colW = CW/2 - 2;
+    fields.forEach(([l1,v1,l2,v2])=>{
+      needPage(10);
+      // Left cell
+      doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+      doc.text(l1, ML, y+3);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+      doc.text(v1, ML, y+7.5);
+      // Right cell
+      if(l2){ doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(...GRAY); doc.text(l2, ML+CW/2, y+3); }
+      if(v2){ doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...DARK); doc.text(v2, ML+CW/2, y+7.5); }
+      // separator line
+      doc.setDrawColor(...LGRAY); doc.setLineWidth(0.2); doc.line(ML, y+10, PW-MR, y+10);
+      y += 11;
+    });
+    y += 3;
+
+    // ── 7. CLAUSE 1 — SERVICES TABLE ─────────────────────────────────────────
+    drawSectionBand('📄  CLÁUSULA 1 — OBJETO DEL CONTRATO (SERVICIOS COTIZADOS)');
+
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...BLACK);
+    const introClause = 'El CONTRATANTE encomienda al PRESTADOR y éste se obliga a prestar los servicios profesionales consistentes en los paquetes y servicios desglosados a continuación:';
+    wrapText(introClause, CW).forEach(ln=>{ needPage(5); doc.text(ln, ML, y); y+=4.5; });
+    y += 3;
+
+    // Table header
+    needPage(10);
+    const colsW = [8, 82, 30, 30, 33]; // #, Desc, Cantidad, PrecioUnit, Subtotal
+    const colsX = [ML, ML+9, ML+91, ML+121, ML+152];
+    doc.setFillColor(...DARK); doc.rect(ML, y, CW, 7, 'F');
+    const thTxt = ['#','DESCRIPCIÓN DEL SERVICIO','CANTIDAD','PRECIO UNIT.','SUBTOTAL'];
+    thTxt.forEach((t,i)=>{
+      doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...GOLD);
+      doc.text(t, colsX[i]+(i>0?1:3), y+4.5, {align: i===0?'center':'left'});
+    });
+    y += 7;
+
+    // Table rows
+    items.forEach((item, idx)=>{
+      const nameLines = doc.splitTextToSize(item.name, colsW[1]-2);
+      const descLines = item.desc ? doc.splitTextToSize(item.desc, colsW[1]-2) : [];
+      const rowH = Math.max((nameLines.length + descLines.length) * 4 + 5, 10);
+
+      needPage(rowH+2);
+      const rowBg = idx%2===0 ? WHITE : [248,248,252];
+      doc.setFillColor(...rowBg); doc.rect(ML, y, CW, rowH, 'F');
+      doc.setDrawColor(...LGRAY); doc.setLineWidth(0.15); doc.line(ML, y+rowH, PW-MR, y+rowH);
+
+      // #
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...PINK);
+      doc.text(String(idx+1), colsX[0]+4, y+5, {align:'center'});
+      // Name
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+      nameLines.forEach((l,li)=>doc.text(l, colsX[1]+1, y+4.5+li*4));
+      if(descLines.length){
+        doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(...GRAY);
+        descLines.forEach((l,li)=>doc.text(l, colsX[1]+1, y+4.5+nameLines.length*4+li*3.5));
+      }
+      // Qty
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...BLACK);
+      doc.text(String(item.qty), colsX[2]+1, y+5);
+      // Price
+      doc.text(fmtPdf(item.price), colsX[3]+1, y+5);
+      // Subtotal
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+      doc.text(fmtPdf(item.sub), colsX[4]+1, y+5);
+
+      y += rowH;
     });
 
-    const {jsPDF} = window.jspdf;
-    // Carta = 215.9 × 279.4 mm
-    const pageW = 215.9, pageH = 279.4;
-    const margin = 10; // mm each side
-    const printW = pageW - margin * 2;
+    // Subtotal / IVA / Total rows
+    needPage(24);
+    const totRows=[
+      ['','','','Subtotal (sin IVA)', fmtPdf(subtotal), false],
+      ['','','','IVA (16%)', fmtPdf(iva), false],
+      ['','','','TOTAL DEL EVENTO', fmtPdf(totalRev), true],
+    ];
+    totRows.forEach(([,,,,val,isTot])=>{
+      const label = totRows.indexOf(totRows.find(r=>r[4]===val));
+      const lblTxt = label===0?'Subtotal (sin IVA)':label===1?'IVA (16%)':'TOTAL DEL EVENTO';
+      const rH = isTot?9:7;
+      if(isTot){ doc.setFillColor(...DARK); doc.rect(ML, y, CW, rH, 'F'); }
+      else { doc.setFillColor(...[245,245,250]); doc.rect(ML, y, CW, rH, 'F'); }
+      doc.setFont('helvetica', isTot?'bold':'normal');
+      doc.setFontSize(isTot?9:8);
+      doc.setTextColor(...(isTot?[255,215,0]:DARK));
+      doc.text(val, PW-MR-2, y+rH/2+2, {align:'right'});
+      doc.text(lblTxt, PW-MR-35, y+rH/2+2, {align:'right'});
+      y += rH;
+    });
+    y += 4;
 
-    // img dimensions in mm
-    const imgW = printW;
-    const imgH = (canvas.height / canvas.width) * imgW;
+    // Total en letras
+    needPage(8);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLACK);
+    const totalLetrasTxt = `Total con letra: ${totalLetras}`;
+    wrapText(totalLetrasTxt, CW).forEach(ln=>{ needPage(5); doc.text(ln, ML, y); y+=4.5; });
+    y += 2;
 
-    const pdf = new jsPDF({ orientation:"portrait", unit:"mm", format:[pageW, pageH] });
+    // Incluye box
+    needPage(16);
+    doc.setFillColor(248,248,255); doc.rect(ML, y, CW, 14, 'F');
+    doc.setFillColor(...PINK); doc.rect(ML, y, 2, 14, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...BLACK);
+    doc.text('📌 INCLUYE en paquetes de comida:', ML+4, y+4.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    const inclTxt='Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca (limón con chía y fruta de temporada). Servicio de 2 horas. Mínimo 50 personas por paquete. Persona extra: $99 MXN.';
+    wrapText(inclTxt, CW-6).forEach((ln,li)=>doc.text(ln, ML+4, y+8+li*4));
+    y += 17;
 
-    // How many pages?
-    const usableH = pageH - margin * 2;
-    const totalPages = Math.ceil(imgH / usableH);
+    // ── 8. CLAUSE 2 — PAYMENT ─────────────────────────────────────────────────
+    drawSectionBand('💰  CLÁUSULA 2 — FORMA DE PAGO');
+    needPage(30);
 
-    for(let page = 0; page < totalPages; page++){
-      if(page > 0) pdf.addPage([pageW, pageH]);
+    // Payment table header
+    doc.setFillColor(...DARK); doc.rect(ML, y, CW, 6.5, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(...GOLD);
+    doc.text('CONCEPTO', ML+2, y+4.2);
+    doc.text('MONTO', ML+130, y+4.2);
+    doc.text('VENCIMIENTO', ML+158, y+4.2);
+    y += 6.5;
 
-      // Crop canvas slice for this page
-      const srcY  = (page * usableH / imgH) * canvas.height;
-      const srcH  = Math.min((usableH / imgH) * canvas.height, canvas.height - srcY);
+    // Anticipo row (green)
+    doc.setFillColor(...BGGREEN); doc.rect(ML, y, CW, 8, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...GREEN);
+    doc.text(`🟢 Anticipo (${anticipo}%) — A pagar al firmar este contrato`, ML+2, y+5.5);
+    doc.text(fmtPdf(antMonto), ML+128, y+5.5, {align:'left'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...GREEN);
+    doc.text('Al momento de firmar', ML+158, y+5.5);
+    y += 8;
 
-      const slice = document.createElement("canvas");
-      slice.width  = canvas.width;
-      slice.height = Math.ceil(srcH);
-      const ctx = slice.getContext("2d");
-      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+    // Saldo row
+    doc.setFillColor(248,248,252); doc.rect(ML, y, CW, 8, 'F');
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...DARK);
+    doc.text(`🔵 Saldo restante (${100-anticipo}%) — A pagar el día del evento, antes del servicio`, ML+2, y+5.5);
+    doc.setFont('helvetica','bold');
+    doc.text(fmtPdf(restante), ML+128, y+5.5);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text('Día del evento', ML+158, y+5.5);
+    y += 10;
 
-      const sliceImg = slice.toDataURL("image/jpeg", 0.93);
-      const sliceH   = (slice.height / canvas.width) * imgW;
+    // Anticipo en letras
+    needPage(8);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...BLACK);
+    wrapText(`Anticipo con letra: ${antLetras}`, CW).forEach(ln=>{ needPage(5); doc.text(ln, ML, y); y+=4.5; });
+    y += 4;
 
-      pdf.addImage(sliceImg, "JPEG", margin, margin, imgW, sliceH);
-    }
+    // ── 9. GENERAL CLAUSES ────────────────────────────────────────────────────
+    drawSectionBand('⚖️  CLÁUSULAS GENERALES');
 
-    const cliente = document.getElementById("ev_cliente").value||"cliente";
-    const fecha   = document.getElementById("ev_fecha").value||new Date().toISOString().split("T")[0];
-    pdf.save(`AlphaProducciones_Contrato_${cliente.replace(/\s+/g,"_")}_${fecha}.pdf`);
+    const clauses = [
+      ['CLÁUSULA 3 — VIGENCIA', 'El PRESTADOR se obliga a desempeñar los servicios objeto del presente contrato en forma personal e independiente, en la fecha, lugar y horario indicados en el apartado de datos del evento.'],
+      ['CLÁUSULA 4 — CANCELACIÓN', 'En caso de cancelación del evento y/o cualquier otro motivo que suspenda la actividad en la fecha acordada, NO HABRÁ REEMBOLSO de la cantidad cubierta al PRESTADOR. Solo se podrá hacer cambio de fecha siempre y cuando se informe con mínimo UNA SEMANA DE ANTICIPACIÓN.'],
+      ['CLÁUSULA 5 — PERSONAS ADICIONALES', 'En caso de requerir el servicio para más personas de las estipuladas, el CONTRATANTE se compromete a pagar el excedente con un costo de $99.00 MXN POR PERSONA EXTRA al término del servicio.'],
+      ['CLÁUSULA 6 — SEGURIDAD', 'El CONTRATANTE deberá brindar las condiciones adecuadas de seguridad con respecto a recurso humano, espacio físico y suministro de energía eléctrica al PRESTADOR, a fin de que se lleve a cabo el servicio en las mejores condiciones.'],
+      ['CLÁUSULA 7 — CONFIDENCIALIDAD', 'Toda información que se suministre entre las partes será proporcionada en términos de estricta reserva y confidencialidad.'],
+      ['CLÁUSULA 8 — DAÑOS Y PERJUICIOS', 'La falta de cumplimiento a cualquiera de las obligaciones aquí contraídas será motivo de rescisión del presente contrato, con el pago de daños y perjuicios que el incumplimiento cause a la contraparte.'],
+    ];
+    if(notas) clauses.push(['NOTAS ADICIONALES', notas]);
+
+    clauses.forEach(([title, body])=>{
+      const bodyLines = doc.splitTextToSize(body, CW);
+      needPage(bodyLines.length * 4 + 8);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(...DARK);
+      doc.text(title+':', ML, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...BLACK);
+      let bodyY = y + 4.5;
+      bodyLines.forEach(ln=>{ needPage(5); doc.text(ln, ML, bodyY); bodyY+=4.5; });
+      y = bodyY + 2;
+    });
+    y += 3;
+
+    // ── 10. STAMP + DATE ─────────────────────────────────────────────────────
+    needPage(18);
+    doc.setDrawColor(...PINK); doc.setLineWidth(0.5);
+    const stampW=80, stampH=8, stampX=(PW-stampW)/2;
+    doc.roundedRect(stampX, y, stampW, stampH, 2, 2, 'S');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(...PINK);
+    doc.text('LEÍDO Y ACEPTADO DE COMÚN ACUERDO', PW/2, y+5.2, {align:'center'});
+    y += 12;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(...GRAY);
+    doc.text(`Zacatecas, Zac. a ${today}`, PW/2, y, {align:'center'});
+    y += 14;
+
+    // ── 11. SIGNATURES ────────────────────────────────────────────────────────
+    needPage(28);
+    const sigX1=ML+20, sigX2=ML+CW/2+10, sigW=CW/2-30;
+    doc.setDrawColor(...BLACK); doc.setLineWidth(0.4);
+    doc.line(sigX1, y, sigX1+sigW, y);
+    doc.line(sigX2, y, sigX2+sigW, y);
+    y += 5;
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(...DARK);
+    doc.text(cliente.toUpperCase(), sigX1+sigW/2, y, {align:'center'});
+    doc.text('JUANA MARÍA MARTÍNEZ SALAZAR', sigX2+sigW/2, y, {align:'center'});
+    y += 4;
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(...GRAY);
+    doc.text('"EL CONTRATANTE"', sigX1+sigW/2, y, {align:'center'});
+    doc.text('"EL PRESTADOR" · ALPHA PRODUCCIONES', sigX2+sigW/2, y, {align:'center'});
+
+    // ── FOOTER last page ─────────────────────────────────────────────────────
+    drawFooter();
+
+    // ── SAVE ─────────────────────────────────────────────────────────────────
+    const fname = `AlphaProducciones_Contrato_${cliente.replace(/\s+/g,'_')}_${fecha||today}.pdf`;
+    doc.save(fname);
     hideLoading();
-  } catch(e){ hideLoading(); alert("Error generando PDF: "+e.message); }
+
+  } catch(e){ hideLoading(); console.error(e); alert("Error generando PDF: "+e.message+"\n"+e.stack); }
+}
+
+function fmtPdf(n){
+  return new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n||0);
 }
 
 // ── WHATSAPP ──────────────────────────────────────────────────────────────────
@@ -1843,34 +2157,15 @@ _¡Gracias por confiar en Alpha Producciones!_
 _📲 492 493 8392_`;
 
   hideLoading();
-  // Try to also download PDF first
+  // Download PDF first, then open WhatsApp
   try{
-    await new Promise(r=>setTimeout(r,100));
-    showLoading("DESCARGANDO PDF...");
-    const el=document.getElementById("quote-preview");
-    const canvas=await html2canvas(el,{scale:2,useCORS:true,backgroundColor:"#ffffff"});
-    const imgData=canvas.toDataURL("image/jpeg",0.92);
-    const {jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
-    const pW=pdf.internal.pageSize.getWidth();
-    const ratio=canvas.width/canvas.height;
-    let imgW=pW-20;
-    let imgH=imgW/ratio;
-    pdf.addImage(imgData,"JPEG",10,10,imgW,imgH);
-    const fname=`AlphaProducciones_Cotizacion_${(cliente).replace(/\s+/g,"_")}.pdf`;
-    pdf.save(fname);
-    hideLoading();
-    setTimeout(()=>{
-      showLoading("ABRIENDO WHATSAPP...");
-      const encodedMsg=encodeURIComponent(msg);
-      window.open(`https://wa.me/524924938392?text=${encodedMsg}`,"_blank");
-      hideLoading();
-    },800);
-  }catch(e){
-    hideLoading();
-    const encodedMsg=encodeURIComponent(msg);
-    window.open(`https://wa.me/524924938392?text=${encodedMsg}`,"_blank");
-  }
+    await downloadPDF();
+    await new Promise(r=>setTimeout(r,600));
+  }catch(e){ /* continue even if PDF fails */ }
+  showLoading("ABRIENDO WHATSAPP...");
+  const encodedMsg=encodeURIComponent(msg);
+  window.open(`https://wa.me/524924938392?text=${encodedMsg}`,"_blank");
+  hideLoading();
 }
 
 function exportShoppingList(){
