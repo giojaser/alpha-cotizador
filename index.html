@@ -962,30 +962,136 @@ select option { background:var(--card); }
   <!-- CLOUD DASHBOARD (visible when connected) -->
   <div id="fbDashboard" style="display:none;">
 
-    <!-- Save current quote button -->
-    <div class="card" style="margin-bottom:16px;border-color:rgba(0,230,118,.2);">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green);letter-spacing:2px;">💾 GUARDAR COTIZACIÓN ACTUAL</div>
-          <div style="font-size:.82rem;color:var(--muted);margin-top:3px;">Guarda los datos del cotizador en la nube</div>
-        </div>
-        <button class="btn btn-green" onclick="saveQuoteToCloud()">☁️ Guardar en Nube</button>
-      </div>
-      <div id="fbSaveMsg" style="display:none;margin-top:10px;"></div>
+    <!-- Sub-tabs -->
+    <div style="display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:var(--radius);border:1px solid rgba(233,30,140,.2);margin-bottom:18px;flex-wrap:wrap;">
+      <button class="tab-btn active" id="dbTab_cot"  onclick="showDbTab('cot',this)"  style="flex:1;min-width:100px;">📋 Cotizaciones</button>
+      <button class="tab-btn"        id="dbTab_pkgs" onclick="showDbTab('pkgs',this)" style="flex:1;min-width:100px;">🍽️ Paquetes</button>
+      <button class="tab-btn"        id="dbTab_svcs" onclick="showDbTab('svcs',this)" style="flex:1;min-width:100px;">🎭 Servicios</button>
+      <button class="tab-btn"        id="dbTab_ing"  onclick="showDbTab('ing',this)"  style="flex:1;min-width:100px;">📦 Ingredientes</button>
     </div>
 
-    <!-- Saved quotes list -->
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--cyan);letter-spacing:2px;">📁 COTIZACIONES GUARDADAS</div>
+    <!-- TAB: Cotizaciones -->
+    <div id="dbPanel_cot">
+      <div class="card" style="margin-bottom:14px;border-color:rgba(0,230,118,.2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green);letter-spacing:2px;">💾 GUARDAR COTIZACIÓN ACTUAL</div>
+            <div style="font-size:.82rem;color:var(--muted);">Guarda la cotización del Cotizador en Firebase</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-green"  id="btnGuardarNube" onclick="saveQuoteToCloud()">☁️ Guardar Nueva</button>
+            <button class="btn btn-orange" id="btnActualizarNube" style="display:none;" onclick="saveQuoteToCloud()">✏️ Actualizar</button>
+            <button class="btn btn-ghost"  id="btnCancelarNube" style="display:none;" onclick="cancelEdit()">✕ Cancelar</button>
+          </div>
+        </div>
+        <div id="fbSaveMsg" style="display:none;margin-top:8px;"></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--cyan);letter-spacing:2px;">📁 HISTORIAL DE COTIZACIONES</div>
+          <input type="text" id="fbSearchInput" placeholder="Buscar cliente, evento..." oninput="filterQuotes()"
+            style="padding:7px 12px;background:var(--input);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:var(--white);font-size:.85rem;outline:none;width:220px;">
+        </div>
+        <div id="fbQuotesList"><div class="alert alert-info">Cargando cotizaciones...</div></div>
+      </div>
+    </div>
+
+    <!-- TAB: Paquetes -->
+    <div id="dbPanel_pkgs" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--pink);letter-spacing:2px;">🍽️ GESTIÓN DE PAQUETES</div>
+        <button class="btn btn-pink" onclick="openPkgEditor(null)">➕ Nuevo Paquete</button>
+      </div>
+      <div id="dbPkgList"></div>
+    </div>
+
+    <!-- TAB: Servicios -->
+    <div id="dbPanel_svcs" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--cyan);letter-spacing:2px;">🎭 GESTIÓN DE SERVICIOS ADICIONALES</div>
+        <button class="btn btn-cyan" onclick="openSvcEditor(null)">➕ Nuevo Servicio</button>
+      </div>
+      <div id="dbSvcList"></div>
+    </div>
+
+    <!-- TAB: Ingredientes -->
+    <div id="dbPanel_ing" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold);letter-spacing:2px;">📦 GESTIÓN DE INGREDIENTES</div>
         <div style="display:flex;gap:8px;">
-          <input type="text" id="fbSearchInput" placeholder="Buscar cliente..." oninput="filterQuotes()" style="padding:6px 12px;background:var(--input);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:var(--white);font-size:.85rem;outline:none;width:180px;">
+          <select id="ingFilterPkg" onchange="renderIngList()" style="padding:7px 12px;background:var(--input);border:1px solid rgba(255,215,0,.3);border-radius:6px;color:var(--white);font-size:.85rem;outline:none;">
+            <option value="">Todos los paquetes</option>
+          </select>
+          <button class="btn btn-gold" onclick="openIngEditorDb(null)">➕ Nuevo Ingrediente</button>
         </div>
       </div>
-      <div id="fbQuotesList"><div class="alert alert-info">Cargando cotizaciones...</div></div>
+      <div id="dbIngList"></div>
     </div>
 
+  </div><!-- end fbDashboard -->
+
+<!-- MODAL EDITAR PAQUETE/SERVICIO -->
+<div class="modal-overlay" id="pkgEditorModal">
+  <div class="modal" style="max-width:600px;">
+    <button class="modal-close" onclick="document.getElementById('pkgEditorModal').classList.remove('open')">✕</button>
+    <h2 id="pkgEditorTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--pink);letter-spacing:2px;margin-bottom:16px;">EDITAR PAQUETE</h2>
+    <div class="add-pkg-form">
+      <input type="hidden" id="pkgEditorId">
+      <input type="hidden" id="pkgEditorType"> <!-- 'pkg' or 'svc' -->
+      <div class="full"><label>NOMBRE</label><input type="text" id="peName" placeholder="Nombre del paquete o servicio"></div>
+      <div><label>PRECIO DE VENTA ($)</label><input type="number" id="pePrice" min="0"></div>
+      <div><label>COSTO ESTIMADO ($)</label><input type="number" id="peCost" min="0"></div>
+      <div>
+        <label>CATEGORÍA</label>
+        <select id="peCat">
+          <option value="comida">🍽️ Comida</option>
+          <option value="barras">🍹 Barras</option>
+          <option value="entret">🎭 Entretenimiento</option>
+          <option value="extra">⭐ Extra</option>
+        </select>
+      </div>
+      <div>
+        <label>MÍNIMO DE PERSONAS</label>
+        <input type="number" id="peMin" min="0" value="0">
+      </div>
+      <div class="full" style="display:flex;align-items:center;gap:10px;padding:10px 0;">
+        <input type="checkbox" id="peFixed" style="width:20px;height:20px;accent-color:var(--gold);">
+        <label style="margin:0;text-transform:none;font-size:.9rem;">Precio FIJO (no se multiplica por personas)</label>
+      </div>
+      <div class="full"><label>DESCRIPCIÓN / CONTENIDO</label><textarea id="peDesc" rows="3" placeholder="Detalla lo que incluye este paquete o servicio..."></textarea></div>
+      <div class="full" style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="document.getElementById('pkgEditorModal').classList.remove('open')">Cancelar</button>
+        <button class="btn btn-pink" onclick="savePkgEditorDb()">💾 Guardar</button>
+      </div>
+    </div>
   </div>
+</div>
+
+<!-- MODAL EDITAR INGREDIENTE -->
+<div class="modal-overlay" id="ingEditorDbModal">
+  <div class="modal" style="max-width:540px;">
+    <button class="modal-close" onclick="document.getElementById('ingEditorDbModal').classList.remove('open')">✕</button>
+    <h2 id="ingEditorDbTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:16px;">EDITAR INGREDIENTE</h2>
+    <div class="add-pkg-form">
+      <input type="hidden" id="ingEditorDbId">
+      <div class="full"><label>NOMBRE DEL INGREDIENTE</label><input type="text" id="ieName" placeholder="Ej: Bistec de res"></div>
+      <div>
+        <label>PAQUETE AL QUE PERTENECE</label>
+        <select id="iePkg" style="padding:8px 12px;background:var(--input);border:1px solid rgba(0,229,255,.2);border-radius:6px;color:var(--white);width:100%;outline:none;"></select>
+      </div>
+      <div><label>UNIDAD</label><input type="text" id="ieUnit" placeholder="kg, litro, paquete..."></div>
+      <div><label>CANTIDAD PARA 100 PERSONAS</label><input type="number" id="ieQty" min="0" step="0.5"></div>
+      <div class="full"><label>PRECIO UNITARIO ($)</label><input type="number" id="iePrice" min="0"></div>
+      <div class="full" style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-ghost" onclick="document.getElementById('ingEditorDbModal').classList.remove('open')">Cancelar</button>
+        <button class="btn btn-gold" onclick="saveIngEditorDb()">💾 Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 </div>
 </div>
@@ -1974,22 +2080,20 @@ async function downloadPDF(){
 
     // Subtotal / IVA / Total rows
     needPage(24);
-    const totRows=[
-      ['','','','Subtotal (sin IVA)', fmtPdf(subtotal), false],
-      ['','','','IVA (16%)', fmtPdf(iva), false],
-      ['','','','TOTAL DEL EVENTO', fmtPdf(totalRev), true],
+    const totRowsData=[
+      {label:'Subtotal (sin IVA)', val:subtotal, isTot:false},
+      {label:'IVA (16%)',           val:iva,      isTot:false},
+      {label:'TOTAL DEL EVENTO',    val:totalRev, isTot:true},
     ];
-    totRows.forEach(([,,,,val,isTot])=>{
-      const label = totRows.indexOf(totRows.find(r=>r[4]===val));
-      const lblTxt = label===0?'Subtotal (sin IVA)':label===1?'IVA (16%)':'TOTAL DEL EVENTO';
+    totRowsData.forEach(({label,val,isTot})=>{
       const rH = isTot?9:7;
       if(isTot){ doc.setFillColor(...DARK); doc.rect(ML, y, CW, rH, 'F'); }
-      else { doc.setFillColor(...[245,245,250]); doc.rect(ML, y, CW, rH, 'F'); }
+      else { doc.setFillColor(245,245,250); doc.rect(ML, y, CW, rH, 'F'); }
       doc.setFont('helvetica', isTot?'bold':'normal');
       doc.setFontSize(isTot?9:8);
       doc.setTextColor(...(isTot?[255,215,0]:DARK));
-      doc.text(val, PW-MR-2, y+rH/2+2, {align:'right'});
-      doc.text(lblTxt, PW-MR-35, y+rH/2+2, {align:'right'});
+      doc.text(fmtPdf(val), PW-MR-2, y+rH/2+2, {align:'right'});
+      doc.text(label, PW-MR-35, y+rH/2+2, {align:'right'});
       y += rH;
     });
     y += 4;
@@ -2585,9 +2689,12 @@ async function initFirebase(){
     sdk.onAuthStateChanged(fbAuth, user => {
       fbUser = user;
       updateFbStatusBar();
+      updateCrudBar();
+      updateNubeCrudBtns();
       if(user){
         fbQuotesRef = sdk.ref(fbDb, 'cotizaciones/'+user.uid);
         listenToQuotes();
+        listenToAllCollections();
       }
     });
 
@@ -2804,6 +2911,239 @@ async function saveQuoteToCloud(){
   } catch(e){
     hideLoading();
     alert('❌ Error al guardar: '+e.message);
+  }
+}
+
+// ── DB ADMIN — CRUD para Paquetes, Servicios e Ingredientes ──────────────────
+
+const FB_PATH = {
+  quotes:      uid => `cotizaciones/${uid}`,
+  packages:    uid => `paquetes/${uid}`,
+  services:    uid => `servicios/${uid}`,
+  ingredients: uid => `ingredientes/${uid}`,
+};
+
+let dbPkgs = [], dbSvcs = [], dbIngs = [];
+
+function showDbTab(id, btn){
+  ['cot','pkgs','svcs','ing'].forEach(t=>{
+    const p=document.getElementById('dbPanel_'+t); if(p) p.style.display=t===id?'':'none';
+    const b=document.getElementById('dbTab_'+t);   if(b) b.classList.toggle('active',t===id);
+  });
+  if(id==='pkgs') renderPkgList();
+  if(id==='svcs') renderSvcList();
+  if(id==='ing')  { populateIngPkgFilter(); renderIngList(); }
+}
+
+function listenToAllCollections(){
+  if(!fbDb||!fbUser) return;
+  const sdk=window._fbSDK, uid=fbUser.uid;
+  sdk.onValue(sdk.ref(fbDb,FB_PATH.packages(uid)), snap=>{
+    dbPkgs=[]; if(snap.exists()) snap.forEach(c=>dbPkgs.push({id:c.key,...c.val()}));
+    renderPkgList(); rebuildPackagesInCotizador();
+  });
+  sdk.onValue(sdk.ref(fbDb,FB_PATH.services(uid)), snap=>{
+    dbSvcs=[]; if(snap.exists()) snap.forEach(c=>dbSvcs.push({id:c.key,...c.val()}));
+    renderSvcList(); rebuildPackagesInCotizador();
+  });
+  sdk.onValue(sdk.ref(fbDb,FB_PATH.ingredients(uid)), snap=>{
+    dbIngs=[]; if(snap.exists()) snap.forEach(c=>dbIngs.push({id:c.key,...c.val()}));
+    renderIngList();
+  });
+}
+
+function rebuildPackagesInCotizador(){
+  const localOnly=customPkgs.filter(p=>!p._fromDB);
+  customPkgs=[...localOnly,...[...dbPkgs,...dbSvcs].map(p=>({...p,_fromDB:true}))];
+  buildTable();
+}
+
+// ── PACKAGES ──────────────────────────────────────────────────────────────────
+function renderPkgList(){
+  const el=document.getElementById('dbPkgList'); if(!el) return;
+  const base=PACKAGES.filter(p=>p.cat!=='section'&&typeof p.id==='number'&&p.id<=9);
+  const all=[...base,...dbPkgs];
+  el.innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:var(--card2);">${['','NOMBRE','PRECIO','COSTO','MARGEN','CAT.','ACCIONES']
+      .map(h=>`<th style="padding:8px 10px;font-family:'Rajdhani',sans-serif;font-size:.72rem;color:var(--gold);border-bottom:2px solid var(--pink);text-align:left;">${h}</th>`).join('')}</tr></thead>
+    <tbody>${all.map((p,i)=>{
+      const bg=i%2===0?'var(--row-b)':'var(--row-a)';
+      const isBase=!dbPkgs.find(d=>d.id===p.id);
+      const m=p.price>0?Math.round((p.price-p.cost)/p.price*100)+'%':'-';
+      return `<tr style="background:${bg};">
+        <td style="padding:7px 8px;"><span style="width:8px;height:8px;border-radius:50%;background:${isBase?'var(--muted)':'var(--green)'};display:inline-block;"></span></td>
+        <td style="padding:7px 8px;color:var(--white);font-weight:600;font-size:.85rem;">${escHtml(p.name)}<div style="font-size:.65rem;color:var(--muted);">${escHtml((p.desc||'').substring(0,55))}</div></td>
+        <td style="padding:7px 8px;color:var(--cyan);">${fmt(p.price)}</td>
+        <td style="padding:7px 8px;color:var(--red);">${fmt(p.cost)}</td>
+        <td style="padding:7px 8px;color:var(--green);font-weight:700;">${m}</td>
+        <td style="padding:7px 8px;"><span class="pkg-cat cat-${p.cat||'comida'}">${p.cat||'comida'}</span></td>
+        <td style="padding:7px 8px;"><div style="display:flex;gap:5px;">
+          <button class="btn-del-quote" style="background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.3);color:var(--cyan);" onclick='openPkgEditor(${JSON.stringify({...p})})'>✏️</button>
+          ${!isBase?`<button class="btn-del-quote" onclick="deleteDbRecord('packages','${p.id}','paquete')">🗑</button>`:'<span style="font-size:.65rem;color:var(--muted);">BASE</span>'}
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function openPkgEditor(pkg){
+  document.getElementById('pkgEditorType').value='pkg';
+  document.getElementById('pkgEditorTitle').textContent=pkg?'EDITAR PAQUETE':'NUEVO PAQUETE';
+  document.getElementById('pkgEditorId').value=pkg?pkg.id:'';
+  document.getElementById('peName').value=pkg?pkg.name:'';
+  document.getElementById('pePrice').value=pkg?pkg.price:'';
+  document.getElementById('peCost').value=pkg?pkg.cost:'';
+  document.getElementById('peCat').value=pkg?(pkg.cat||'comida'):'comida';
+  document.getElementById('peMin').value=pkg?(pkg.min||0):0;
+  document.getElementById('peFixed').checked=pkg?!!pkg.fixed:false;
+  document.getElementById('peDesc').value=pkg?(pkg.desc||''):'';
+  document.getElementById('pkgEditorModal').classList.add('open');
+}
+
+async function savePkgEditorDb(){
+  if(!fbDb||!fbUser){alert('Conéctate a Firebase');return;}
+  const name=document.getElementById('peName').value.trim();
+  const price=parseFloat(document.getElementById('pePrice').value)||0;
+  const cost=parseFloat(document.getElementById('peCost').value)||0;
+  if(!name||!price){alert('Ingresa nombre y precio');return;}
+  const type=document.getElementById('pkgEditorType').value;
+  const id=document.getElementById('pkgEditorId').value;
+  const basePath=type==='svc'?FB_PATH.services(fbUser.uid):FB_PATH.packages(fbUser.uid);
+  const data={name,price,cost,fixed:document.getElementById('peFixed').checked,
+    cat:document.getElementById('peCat').value,min:parseInt(document.getElementById('peMin').value)||0,
+    desc:document.getElementById('peDesc').value.trim(),updatedAt:Date.now()};
+  showLoading('GUARDANDO...');
+  try{
+    if(id){await window._fbSDK.set(window._fbSDK.ref(fbDb,`${basePath}/${id}`),data);}
+    else{data.createdAt=Date.now();await window._fbSDK.push(window._fbSDK.ref(fbDb,basePath),data);}
+    hideLoading();
+    document.getElementById('pkgEditorModal').classList.remove('open');
+  }catch(e){hideLoading();alert('Error: '+e.message);}
+}
+
+// ── SERVICES ──────────────────────────────────────────────────────────────────
+function renderSvcList(){
+  const el=document.getElementById('dbSvcList'); if(!el) return;
+  const base=PACKAGES.filter(p=>p.cat!=='section'&&typeof p.id==='number'&&p.id>=10);
+  const all=[...base,...dbSvcs];
+  el.innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:var(--card2);">${['','SERVICIO','PRECIO','COSTO','CAT.','ACCIONES']
+      .map(h=>`<th style="padding:8px 10px;font-family:'Rajdhani',sans-serif;font-size:.72rem;color:var(--gold);border-bottom:2px solid var(--cyan);text-align:left;">${h}</th>`).join('')}</tr></thead>
+    <tbody>${all.map((p,i)=>{
+      const bg=i%2===0?'var(--row-b)':'var(--row-a)';
+      const isBase=!dbSvcs.find(d=>d.id===p.id);
+      return `<tr style="background:${bg};">
+        <td style="padding:7px 8px;"><span style="width:8px;height:8px;border-radius:50%;background:${isBase?'var(--muted)':'var(--cyan)'};display:inline-block;"></span></td>
+        <td style="padding:7px 8px;color:var(--white);font-weight:600;font-size:.85rem;">${escHtml(p.name)}</td>
+        <td style="padding:7px 8px;color:var(--cyan);">${fmt(p.price)}</td>
+        <td style="padding:7px 8px;color:var(--red);">${fmt(p.cost)}</td>
+        <td style="padding:7px 8px;"><span class="pkg-cat cat-${p.cat||'entret'}">${p.cat||'entret'}</span></td>
+        <td style="padding:7px 8px;"><div style="display:flex;gap:5px;">
+          <button class="btn-del-quote" style="background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.3);color:var(--cyan);" onclick='openSvcEditor(${JSON.stringify({...p})})'>✏️</button>
+          ${!isBase?`<button class="btn-del-quote" onclick="deleteDbRecord('services','${p.id}','servicio')">🗑</button>`:'<span style="font-size:.65rem;color:var(--muted);">BASE</span>'}
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>`;
+}
+
+function openSvcEditor(svc){
+  document.getElementById('pkgEditorType').value='svc';
+  document.getElementById('pkgEditorTitle').textContent=svc?'EDITAR SERVICIO':'NUEVO SERVICIO';
+  document.getElementById('pkgEditorId').value=svc?svc.id:'';
+  document.getElementById('peName').value=svc?svc.name:'';
+  document.getElementById('pePrice').value=svc?svc.price:'';
+  document.getElementById('peCost').value=svc?svc.cost:'';
+  document.getElementById('peCat').value=svc?(svc.cat||'entret'):'entret';
+  document.getElementById('peMin').value=0;
+  document.getElementById('peFixed').checked=svc?!!svc.fixed:true;
+  document.getElementById('peDesc').value=svc?(svc.desc||''):'';
+  document.getElementById('pkgEditorModal').classList.add('open');
+}
+
+// ── INGREDIENTS ───────────────────────────────────────────────────────────────
+function populateIngPkgFilter(){
+  const sel=document.getElementById('ingFilterPkg'); if(!sel) return;
+  const all=[...PACKAGES.filter(p=>p.cat!=='section'),...dbPkgs];
+  sel.innerHTML='<option value="">Todos los paquetes</option>'+
+    all.map(p=>`<option value="${p.id}">${escHtml(p.name.substring(0,45))}</option>`).join('');
+}
+
+function renderIngList(){
+  const el=document.getElementById('dbIngList'); if(!el) return;
+  const filter=document.getElementById('ingFilterPkg')?document.getElementById('ingFilterPkg').value:'';
+  const base=INGREDIENTS.map((ing,idx)=>({id:`base_${idx}`,pkgId:ing[0],name:ing[1],unit:ing[2],qty100:ing[3],price:ing[4],_base:true}));
+  let all=[...base,...dbIngs.map(d=>({...d,_base:false}))];
+  if(filter) all=all.filter(i=>String(i.pkgId)===String(filter));
+  if(!all.length){el.innerHTML='<div class="alert alert-info">Sin ingredientes.</div>';return;}
+  const pkgName=id=>{const p=[...PACKAGES,...dbPkgs].find(p=>String(p.id)===String(id));return p?p.name.replace('Paquete #','P#').substring(0,20):'P'+id;};
+  el.innerHTML=`<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:var(--card2);">${['PKG','INGREDIENTE','UNIDAD','CANT/100p','PRECIO','COSTO 100p','ACCIONES']
+      .map(h=>`<th style="padding:7px 9px;font-family:'Rajdhani',sans-serif;font-size:.7rem;color:var(--gold);border-bottom:2px solid var(--gold);text-align:left;">${h}</th>`).join('')}</tr></thead>
+    <tbody>${all.map((ing,i)=>{
+      const bg=i%2===0?'var(--row-b)':'var(--row-a)';
+      return `<tr style="background:${bg};">
+        <td style="padding:6px 8px;font-size:.72rem;"><span style="padding:1px 6px;background:rgba(233,30,140,.15);border-radius:8px;color:var(--pink);">${pkgName(ing.pkgId)}</span></td>
+        <td style="padding:6px 8px;color:var(--white);font-size:.85rem;">${escHtml(ing.name)}${!ing._base?' <span style="font-size:.6rem;padding:1px 4px;background:rgba(0,229,255,.15);border-radius:6px;color:var(--cyan);">+</span>':''}</td>
+        <td style="padding:6px 8px;color:var(--muted);font-size:.8rem;">${escHtml(ing.unit)}</td>
+        <td style="padding:6px 8px;color:var(--cyan);font-weight:700;">${ing.qty100}</td>
+        <td style="padding:6px 8px;color:var(--gold);">${fmt(ing.price)}</td>
+        <td style="padding:6px 8px;color:var(--green);">${fmt((ing.qty100||0)*(ing.price||0))}</td>
+        <td style="padding:6px 8px;"><div style="display:flex;gap:4px;">
+          <button class="btn-del-quote" style="background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3);color:var(--gold);" onclick='openIngEditorDb(${JSON.stringify({...ing,_base:undefined})})'>✏️</button>
+          ${!ing._base?`<button class="btn-del-quote" onclick="deleteDbRecord('ingredients','${ing.id}','ingrediente')">🗑</button>`:'<span style="font-size:.6rem;color:var(--muted);">BASE</span>'}
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table></div>
+  <div style="font-size:.72rem;color:var(--muted);margin-top:6px;"><span style="color:var(--cyan);">+</span> = Agregado en Firebase · BASE = Predefinido (editable desde 🛒 Lista de Compras)</div>`;
+}
+
+function openIngEditorDb(ing){
+  const all=[...PACKAGES.filter(p=>p.cat!=='section'),...dbPkgs];
+  const sel=document.getElementById('iePkg');
+  sel.innerHTML=all.map(p=>`<option value="${p.id}">${escHtml(p.name.substring(0,45))}</option>`).join('');
+  document.getElementById('ingEditorDbTitle').textContent=ing?'EDITAR INGREDIENTE':'NUEVO INGREDIENTE';
+  document.getElementById('ingEditorDbId').value=ing?ing.id:'';
+  document.getElementById('ieName').value=ing?ing.name:'';
+  document.getElementById('ieUnit').value=ing?ing.unit:'kg';
+  document.getElementById('ieQty').value=ing?ing.qty100:'';
+  document.getElementById('iePrice').value=ing?ing.price:'';
+  if(ing) sel.value=ing.pkgId;
+  document.getElementById('ingEditorDbModal').classList.add('open');
+}
+
+async function saveIngEditorDb(){
+  if(!fbDb||!fbUser){alert('Conéctate a Firebase');return;}
+  const name=document.getElementById('ieName').value.trim();
+  const unit=document.getElementById('ieUnit').value.trim()||'u.';
+  const qty=parseFloat(document.getElementById('ieQty').value)||0;
+  const price=parseFloat(document.getElementById('iePrice').value)||0;
+  const pkgId=document.getElementById('iePkg').value;
+  if(!name||!pkgId){alert('Ingresa nombre y selecciona paquete');return;}
+  const id=document.getElementById('ingEditorDbId').value;
+  const basePath=FB_PATH.ingredients(fbUser.uid);
+  const data={pkgId:isNaN(+pkgId)?pkgId:+pkgId,name,unit,qty100:qty,price,updatedAt:Date.now()};
+  showLoading('GUARDANDO...');
+  try{
+    if(id&&!id.startsWith('base_')){await window._fbSDK.set(window._fbSDK.ref(fbDb,`${basePath}/${id}`),data);}
+    else{data.createdAt=Date.now();await window._fbSDK.push(window._fbSDK.ref(fbDb,basePath),data);}
+    hideLoading();
+    document.getElementById('ingEditorDbModal').classList.remove('open');
+  }catch(e){hideLoading();alert('Error: '+e.message);}
+}
+
+async function deleteDbRecord(collection,id,label){
+  if(!fbDb||!fbUser) return;
+  if(!confirm(`¿Eliminar este ${label} permanentemente?\n\nEsta acción NO se puede deshacer.`)) return;
+  const pathFns={packages:FB_PATH.packages,services:FB_PATH.services,ingredients:FB_PATH.ingredients,quotes:uid=>`cotizaciones/${uid}`};
+  const fullPath=pathFns[collection](fbUser.uid)+'/'+id;
+  showLoading('ELIMINANDO...'); try{await window._fbSDK.remove(window._fbSDK.ref(fbDb,fullPath));hideLoading();}catch(e){hideLoading();alert('Error: '+e.message);}
+}
+
+function updateNubeCrudBtns(){
+  const g=document.getElementById('btnGuardarNube'),a=document.getElementById('btnActualizarNube'),c=document.getElementById('btnCancelarNube');
+  if(editingQuoteId){
+    if(g) g.style.display='none'; if(a){a.style.display='';a.textContent='✏️ Actualizar #'+editingQuoteId.slice(-4);} if(c) c.style.display='';
+  }else{
+    if(g) g.style.display=''; if(a) a.style.display='none'; if(c) c.style.display='none';
   }
 }
 
