@@ -17,14 +17,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, remove, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-         signOut, onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ── Expose Firebase to global scope after config is set ──────────────────────
-window._fbSDK = { initializeApp, getDatabase, ref, push, set, onValue, remove,
-                  serverTimestamp, getAuth, signInWithEmailAndPassword,
-                  createUserWithEmailAndPassword, signOut, onAuthStateChanged };
+// ── Expose Firebase to global scope ─────────────────────────────────────────
+window._fbSDK = { initializeApp, getDatabase, ref, push, set, onValue, remove, serverTimestamp };
 </script>
 
 <style>
@@ -616,7 +611,7 @@ select option { background:var(--card); }
       <button class="tab-btn" onclick="showTab('compras',this)">🛒 LISTA DE COMPRAS</button>
       <button class="tab-btn" onclick="showTab('rentabilidad',this)">📊 RENTABILIDAD</button>
       <button class="tab-btn" onclick="showTab('servicios',this)">🎭 SERVICIOS ALPHA</button>
-      <button class="tab-btn" onclick="showTab('nube',this)" id="tabNube">☁️ NUBE</button>
+      <button class="tab-btn" onclick="showTab('nube',this)" id="tabNube">🗄️ BASE DE DATOS</button>
     </div>
   </div>
 </header>
@@ -720,12 +715,12 @@ select option { background:var(--card); }
   <!-- ── CRUD BUTTONS — siempre visibles ── -->
   <div class="crud-bar" id="crudBar">
     <div class="crud-bar-title">
-      <span id="crudEditLabel">💾 GUARDAR EN NUBE</span>
+      <span id="crudEditLabel">💾 GUARDAR</span>
       <span id="crudConnStatus" class="crud-conn-off">● Sin conectar</span>
     </div>
     <div class="crud-bar-btns">
       <button class="btn btn-green"  id="btnGuardar"    onclick="saveQuoteToCloud()">
-        <span>☁️</span> Guardar Nueva
+        💾 Guardar
       </button>
       <button class="btn btn-orange" id="btnActualizar" onclick="saveQuoteToCloud()" style="display:none;">
         <span>✏️</span> Actualizar
@@ -842,8 +837,8 @@ select option { background:var(--card); }
 <div class="container" style="padding-top:28px;">
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;">
     <div>
-      <div class="section-title">☁️ NUBE — FIREBASE</div>
-      <div class="section-sub">Guarda cotizaciones, clientes y datos en tiempo real · Accede desde cualquier dispositivo</div>
+      <div class="section-title">🗄️ BASE DE DATOS — FIREBASE</div>
+      <div class="section-sub">Guarda cotizaciones en tu base de datos Firebase en tiempo real · Accede desde cualquier dispositivo</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;" id="cloudAuthBtns">
       <button class="btn btn-ghost" onclick="showFirebaseSetup()">⚙️ Configurar Firebase</button>
@@ -979,7 +974,7 @@ select option { background:var(--card); }
             <div style="font-size:.82rem;color:var(--muted);">Guarda la cotización del Cotizador en Firebase</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-green"  id="btnGuardarNube" onclick="saveQuoteToCloud()">☁️ Guardar Nueva</button>
+            <button class="btn btn-green"  id="btnGuardarNube" onclick="saveQuoteToCloud()">💾 Guardar</button>
             <button class="btn btn-orange" id="btnActualizarNube" style="display:none;" onclick="saveQuoteToCloud()">✏️ Actualizar</button>
             <button class="btn btn-ghost"  id="btnCancelarNube" style="display:none;" onclick="cancelEdit()">✕ Cancelar</button>
           </div>
@@ -1098,14 +1093,16 @@ select option { background:var(--card); }
 
 <!-- FIREBASE CONFIG MODAL -->
 <div class="modal-overlay" id="fbConfigModal">
-  <div class="modal" style="max-width:620px;">
-    <button class="modal-close" onclick="document.getElementById('fbConfigModal').classList.remove('open')">✕</button>
-    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">⚙️ CONFIGURACIÓN FIREBASE</h2>
-    <p style="color:var(--muted);font-size:.85rem;margin-bottom:18px;">Pega aquí el objeto <code>firebaseConfig</code> de tu proyecto. Lo encontrarás en Firebase Console → Configuración del proyecto → Tu aplicación web.</p>
-
-    <div style="margin-bottom:14px;">
+  <div class="modal" style="max-width:600px;">
+    <button class="modal-close" onclick="closeAllModals()">✕</button>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:6px;">⚙️ CONFIGURAR FIREBASE</h2>
+    <p style="color:var(--muted);font-size:.83rem;margin-bottom:14px;">
+      Pega tu <code style="background:rgba(0,188,212,.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.8rem;color:var(--cyan)">firebaseConfig</code> abajo.
+      <strong style="color:var(--green)">No necesitas email ni contraseña</strong> — conexión directa a tu base de datos Firebase.
+    </p>
+    <div style="margin-bottom:12px;">
       <label>PEGA TU firebaseConfig AQUÍ</label>
-      <textarea id="fbConfigInput" rows="10" oninput="previewParsedConfig()" placeholder='const firebaseConfig = {
+      <textarea id="fbConfigInput" rows="9" oninput="previewParsedConfig()" placeholder='const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "tu-proyecto.firebaseapp.com",
   databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
@@ -1113,29 +1110,19 @@ select option { background:var(--card); }
   storageBucket: "tu-proyecto.appspot.com",
   messagingSenderId: "123456789",
   appId: "1:123456789:web:abc123"
-};' style="font-family:monospace;font-size:.82rem;resize:vertical;"></textarea>
-      <div id="fbParseMsg" style="display:none;margin-top:8px;"></div>
+};' style="font-family:monospace;font-size:.78rem;resize:vertical;background:var(--input);border:1px solid rgba(0,188,212,.2);border-radius:6px;color:var(--white);padding:10px;width:100%;outline:none"></textarea>
+      <div id="fbParseMsg" style="margin-top:8px;"></div>
     </div>
-
-    <div style="background:var(--row-a);border-radius:8px;padding:14px;margin-bottom:16px;">
-      <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.8rem;color:var(--cyan);letter-spacing:1px;margin-bottom:10px;">🔐 CREAR USUARIO ADMINISTRADOR</div>
-      <div class="grid-2" style="gap:10px;">
-        <div><label>EMAIL</label><input type="email" id="fbEmail" placeholder="admin@alphaproducciones.mx"></div>
-        <div><label>CONTRASEÑA</label><input type="password" id="fbPassword" placeholder="mínimo 6 caracteres"></div>
-      </div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-cyan" style="flex:1;" onclick="fbRegister()">➕ Crear cuenta</button>
-        <button class="btn btn-pink" style="flex:1;" onclick="fbLogin()">🔑 Iniciar sesión</button>
-      </div>
-      <div id="fbAuthMsg" style="margin-top:8px;font-size:.82rem;"></div>
+    <div class="alert info" style="margin-bottom:12px;font-size:.78rem;">
+      ℹ️ Encuentra tu firebaseConfig en: <strong>Firebase Console → ⚙️ Configuración del proyecto → Tu aplicación web → firebaseConfig</strong>
     </div>
-
     <div style="display:flex;gap:10px;justify-content:flex-end;">
-      <button class="btn btn-ghost" onclick="document.getElementById('fbConfigModal').classList.remove('open')">Cancelar</button>
-      <button class="btn btn-gold" onclick="initFirebase()">✅ Conectar a Firebase</button>
+      <button class="btn btn-ghost" onclick="closeAllModals()">Cancelar</button>
+      <button class="btn btn-gold" onclick="connectFirebase()">🔗 Conectar a Firebase</button>
     </div>
   </div>
 </div>
+
 
 <!-- QUOTE DETAIL MODAL -->
 <div class="modal-overlay" id="fbQuoteDetailModal">
@@ -1264,7 +1251,8 @@ function buildTable(){
       <td><span class="pkg-cat ${catClass}">${catLabel}</span></td>
       <td>
         <input class="qty-input" type="number" min="0" value="${qty||""}" placeholder="0"
-          oninput="setQty(${JSON.stringify(pkg.id)},+this.value)"
+          oninput="setQty(${JSON.stringify(pkg.id)},this.value)"
+          data-pid="${pkg.id}"
           ${pkg.min>0?`title="Mínimo ${pkg.min} personas"`:""}
           style="${pkg.min>0?'border-color:rgba(255,215,0,.5)':''}">
         ${pkg.min>0?`<div style="font-size:.65rem;color:var(--gold);margin-top:2px;">mín. ${pkg.min}</div>`:""}
@@ -1282,12 +1270,46 @@ function buildTable(){
 }
 
 function setQty(id, val){
-  quantities[id] = val;
-  recalcAll();
+  const v = parseInt(val)||0;
+  if(v > 0) quantities[id] = v; else delete quantities[id];
+  // Update only the calculated cells without rebuilding the table
+  updateRowCalcs(id);
+  updateKPIs();
+  updateShopList();
+  updateProfitability();
 }
 function setPrice(id, val){
-  userPrices[id] = val;
-  recalcAll();
+  userPrices[id] = parseFloat(val)||0;
+  updateRowCalcs(id);
+  updateKPIs();
+  updateShopList();
+  updateProfitability();
+}
+
+// Update subtotal/cost/profit cells for a single row without rebuilding the table
+function updateRowCalcs(pkgId){
+  const allPkgs = [...PACKAGES, ...customPkgs];
+  const pkg = allPkgs.find(p => String(p.id) === String(pkgId));
+  if(!pkg || pkg.cat === 'section') return;
+  const qty   = quantities[pkgId] || 0;
+  const price = userPrices[pkgId] !== undefined ? userPrices[pkgId] : pkg.price;
+  const sub   = pkg.fixed ? (qty > 0 ? price : 0) : price * qty;
+  const cost  = pkg.fixed ? (qty > 0 ? pkg.cost : 0) : pkg.cost * qty;
+  const gain  = sub - cost;
+  // Find the row by scanning all qty inputs for matching pkg.id
+  const rows = document.querySelectorAll('#pkgTableBody tr');
+  rows.forEach(tr => {
+    const inp = tr.querySelector('.qty-input');
+    if(!inp || String(inp.getAttribute('data-pid') || '') !== String(pkgId)) return;
+    // update subtotal (col 7), cost (col 8), profit (col 9)
+    const cells = tr.querySelectorAll('td');
+    if(cells[6]) cells[6].textContent = qty > 0 ? fmt(sub) : '—';
+    if(cells[7]) cells[7].textContent = qty > 0 ? fmt(cost) : '—';
+    if(cells[8]){
+      cells[8].textContent = qty > 0 ? fmt(gain) : '—';
+      cells[8].style.color = gain >= 0 ? 'var(--green)' : 'var(--red)';
+    }
+  });
 }
 
 function recalcAll(){
@@ -2566,12 +2588,18 @@ function previewParsedConfig(){
 }
 
 
+function closeAllModals(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open'));
+}
+
 function showFirebaseSetup(){
-  // Pre-fill from localStorage if saved
   const saved = localStorage.getItem('fbConfig');
-  if(saved) document.getElementById('fbConfigInput').value = saved;
-  const savedEmail = localStorage.getItem('fbEmail');
-  if(savedEmail) document.getElementById('fbEmail').value = savedEmail;
+  if(saved){
+    try{
+      const el = document.getElementById('fbConfigInput');
+      if(el){ el.value = JSON.stringify(JSON.parse(saved), null, 2); previewParsedConfig(); }
+    }catch(e){}
+  }
   document.getElementById('fbConfigModal').classList.add('open');
 }
 
@@ -2638,143 +2666,68 @@ function parseFirebaseConfig(raw){
   return null;
 }
 
-async function initFirebase(){
-  const raw = document.getElementById('fbConfigInput').value.trim();
-  if(!raw){
-    showFbConfigError('Pega tu firebaseConfig primero. Lo encuentras en Firebase Console → ⚙️ Configuración del proyecto → Tu app web.');
-    return;
-  }
-
+// ── CONNECT FIREBASE (no auth required) ──────────────────────────────────────
+async function connectFirebase(){
+  const rawEl = document.getElementById('fbConfigInput') || document.getElementById('fbConfigTxt');
+  const raw = rawEl ? rawEl.value.trim() : '';
+  if(!raw){ showFbConfigError('Pega tu firebaseConfig primero.'); return; }
   const config = parseFirebaseConfig(raw);
   if(!config || !config.apiKey){
-    showFbConfigError(
-      '❌ No se pudo leer el firebaseConfig.\n\n' +
-      'Asegúrate de pegar el bloque completo, por ejemplo:\n\n' +
-      'const firebaseConfig = {\n' +
-      '  apiKey: "AIzaSy...",\n' +
-      '  authDomain: "tu-app.firebaseapp.com",\n' +
-      '  databaseURL: "https://tu-app-default-rtdb.firebaseio.com",\n' +
-      '  projectId: "tu-app",\n' +
-      '  storageBucket: "tu-app.appspot.com",\n' +
-      '  messagingSenderId: "123456",\n' +
-      '  appId: "1:123456:web:abc"\n' +
-      '};'
-    );
+    showFbConfigError('Formato invalido. Pega el bloque completo firebaseConfig.');
     return;
   }
-
   if(!config.databaseURL){
-    showFbConfigError(
-      '⚠️ Falta el campo "databaseURL" en tu config.\n\n' +
-      'Ve a Firebase Console → Realtime Database → copia la URL que aparece arriba (ej: https://tu-app-default-rtdb.firebaseio.com)\n\n' +
-      'Agrégala manualmente a tu config:\n  databaseURL: "https://tu-app-default-rtdb.firebaseio.com"'
-    );
+    showFbConfigError('Falta el campo databaseURL.\nVe a Firebase Console → Realtime Database y copia la URL (https://tu-app-default-rtdb.firebaseio.com)');
     return;
   }
-
-  // Save config for reuse
   localStorage.setItem('fbConfig', JSON.stringify(config));
-
-
-  try {
+  try{
     showLoading('CONECTANDO A FIREBASE...');
     const sdk = window._fbSDK;
-    if(!sdk){ hideLoading(); alert('SDK de Firebase no cargó. Verifica tu conexión a internet.'); return; }
-
-    fbApp  = sdk.initializeApp(config, 'alpha-'+Date.now());
-    fbDb   = sdk.getDatabase(fbApp);
-    fbAuth = sdk.getAuth(fbApp);
-
-    // Auth state listener
-    sdk.onAuthStateChanged(fbAuth, user => {
-      fbUser = user;
-      updateFbStatusBar();
-      updateCrudBar();
-      updateNubeCrudBtns();
-      if(user){
-        fbQuotesRef = sdk.ref(fbDb, 'cotizaciones/'+user.uid);
-        listenToQuotes();
-        listenToAllCollections();
-      }
+    if(!sdk){ hideLoading(); alert('SDK Firebase no cargo. Verifica tu conexion a internet.'); return; }
+    fbApp = sdk.initializeApp(config, 'alpha-'+Date.now());
+    fbDb  = sdk.getDatabase(fbApp);
+    // Use projectId as the user namespace — no auth needed
+    fbUser = (config.projectId||'alpha').replace(/[^a-z0-9_-]/gi,'_');
+    fbQuotesRef = sdk.ref(fbDb, 'cotizaciones/'+fbUser);
+    // Listen to all collections
+    sdk.onValue(fbQuotesRef, snap=>{
+      allCloudQuotes=[];
+      if(snap.exists()) snap.forEach(c=>allCloudQuotes.push({id:c.key,...c.val()}));
+      allCloudQuotes.sort((a,b)=>(b.creadoEn||0)-(a.creadoEn||0));
+      renderQuotesList(allCloudQuotes);
     });
-
+    sdk.onValue(sdk.ref(fbDb,`paquetes/${fbUser}`), snap=>{
+      dbPkgs=[]; if(snap.exists()) snap.forEach(c=>dbPkgs.push({id:c.key,...c.val()}));
+      buildTable(); renderAdminPkgs();
+    });
+    sdk.onValue(sdk.ref(fbDb,`servicios/${fbUser}`), snap=>{
+      dbSvcs=[]; if(snap.exists()) snap.forEach(c=>dbSvcs.push({id:c.key,...c.val()}));
+      buildTable(); renderAdminSvcs();
+    });
+    sdk.onValue(sdk.ref(fbDb,`ingredientes/${fbUser}`), snap=>{
+      dbIngs=[]; if(snap.exists()) snap.forEach(c=>dbIngs.push({id:c.key,...c.val()}));
+      renderAdminIng();
+    });
     hideLoading();
-    document.getElementById('fbConfigModal').classList.remove('open');
-    setFbStatus('connecting','Conectando...');
-
-    // Try auto-login with saved credentials
-    const savedEmail = localStorage.getItem('fbEmail');
-    const savedPwd   = localStorage.getItem('fbPwd');
-    if(savedEmail && savedPwd){
-      try {
-        await sdk.signInWithEmailAndPassword(fbAuth, savedEmail, savedPwd);
-      } catch(e){ /* silent fail — user can login manually */ }
-    }
-
-  } catch(e){
-    hideLoading();
-    alert('❌ Error al inicializar Firebase:\n'+e.message+'\n\nVerifica que el firebaseConfig sea correcto y que el databaseURL esté incluido.');
-  }
+    closeAllModals();
+    updateFbStatusBar();
+    updateCrudBar();
+    if(document.getElementById('tabNube')) document.getElementById('tabNube').textContent='🗄️ BD ✅';
+  }catch(e){ hideLoading(); alert('Error al conectar Firebase: '+e.message); }
 }
 
-async function fbLogin(){
-  const email = document.getElementById('fbEmail').value.trim();
-  const pwd   = document.getElementById('fbPassword').value;
-  const msg   = document.getElementById('fbAuthMsg');
-  if(!email||!pwd){ msg.textContent='❌ Ingresa email y contraseña'; msg.style.color='var(--red)'; return; }
-  if(!fbAuth){ await initFirebase(); return; }
-  try {
-    msg.textContent='🔄 Iniciando sesión...'; msg.style.color='var(--cyan)';
-    await window._fbSDK.signInWithEmailAndPassword(fbAuth, email, pwd);
-    localStorage.setItem('fbEmail', email);
-    localStorage.setItem('fbPwd', pwd);
-    msg.textContent='✅ Sesión iniciada'; msg.style.color='var(--green)';
-    setTimeout(()=>document.getElementById('fbConfigModal').classList.remove('open'),800);
-  } catch(e){
-    msg.textContent='❌ '+translateFbError(e.code); msg.style.color='var(--red)';
-  }
+// Alias for backwards compat
+async function initFirebase(){ return connectFirebase(); }
+
+function showFbConfigError(msg){
+  const el = document.getElementById('fbParseMsg') || document.getElementById('fbParseResult');
+  if(el){
+    el.style.display='block';
+    el.innerHTML=`<div style="background:rgba(255,82,82,.08);border:1px solid rgba(255,82,82,.25);border-radius:6px;padding:10px 13px;color:var(--red);font-size:.8rem;white-space:pre-wrap">${esc(msg)}</div>`;
+  } else { alert(msg); }
 }
 
-async function fbRegister(){
-  const email = document.getElementById('fbEmail').value.trim();
-  const pwd   = document.getElementById('fbPassword').value;
-  const msg   = document.getElementById('fbAuthMsg');
-  if(!email||!pwd){ msg.textContent='❌ Ingresa email y contraseña'; msg.style.color='var(--red)'; return; }
-  if(pwd.length<6){ msg.textContent='❌ La contraseña debe tener mínimo 6 caracteres'; msg.style.color='var(--red)'; return; }
-  if(!fbAuth){ await initFirebase(); if(!fbAuth) return; }
-  try {
-    msg.textContent='🔄 Creando cuenta...'; msg.style.color='var(--cyan)';
-    await window._fbSDK.createUserWithEmailAndPassword(fbAuth, email, pwd);
-    localStorage.setItem('fbEmail', email);
-    localStorage.setItem('fbPwd', pwd);
-    msg.textContent='✅ Cuenta creada e iniciada'; msg.style.color='var(--green)';
-    setTimeout(()=>document.getElementById('fbConfigModal').classList.remove('open'),800);
-  } catch(e){
-    msg.textContent='❌ '+translateFbError(e.code); msg.style.color='var(--red)';
-  }
-}
-
-async function fbLogout(){
-  if(!fbAuth) return;
-  await window._fbSDK.signOut(fbAuth);
-  fbUser=null; fbQuotesRef=null; allCloudQuotes=[];
-  updateFbStatusBar();
-  document.getElementById('fbDashboard').style.display='none';
-  document.getElementById('fbGuideSection').style.display='block';
-}
-
-function translateFbError(code){
-  const map={
-    'auth/user-not-found':'Usuario no encontrado',
-    'auth/wrong-password':'Contraseña incorrecta',
-    'auth/email-already-in-use':'Este email ya está registrado',
-    'auth/invalid-email':'Email inválido',
-    'auth/weak-password':'Contraseña muy débil (mín. 6 caracteres)',
-    'auth/network-request-failed':'Sin conexión a internet',
-    'auth/too-many-requests':'Demasiados intentos. Espera unos minutos.',
-  };
-  return map[code]||code;
-}
 
 function setFbStatus(state, text){
   const dot  = document.getElementById('fbDot');
@@ -2795,7 +2748,7 @@ function updateFbStatusBar(){
     if(actionBtns) actionBtns.innerHTML=`<button class="btn btn-ghost" style="font-size:.78rem;padding:6px 12px;" onclick="fbLogout()">🚪 Cerrar sesión</button>`;
     document.getElementById('fbDashboard').style.display='block';
     document.getElementById('fbGuideSection').style.display='none';
-    document.getElementById('tabNube').textContent='☁️ NUBE ✅';
+    document.getElementById('tabNube').textContent='🗄️ BD ✅';
   } else if(fbApp){
     setFbStatus('connecting','Firebase iniciado — inicia sesión');
     if(userInfo) userInfo.style.display='none';
@@ -2834,7 +2787,7 @@ function updateCrudBar(){
     if(btnCan)  btnCan.style.display='';
     if(bar) bar.style.borderColor='rgba(255,152,0,.6)';
   } else {
-    if(lbl) lbl.textContent='💾 GUARDAR EN NUBE';
+    if(lbl) lbl.textContent='💾 GUARDAR';
     if(fbUser && btnGuardar) btnGuardar.style.display='';
     if(!fbUser && btnGuardar) btnGuardar.style.display='none';
     if(btnAct) btnAct.style.display='none';
@@ -2885,7 +2838,7 @@ async function saveQuoteToCloud(){
   };
 
   try {
-    showLoading(editingQuoteId?'ACTUALIZANDO EN LA NUBE...':'GUARDANDO EN LA NUBE...');
+    showLoading(editingQuoteId?'ACTUALIZANDO EN FIREBASE...':'GUARDANDO EN FIREBASE...');
     if(editingQuoteId){
       quoteData.actualizadoEn = Date.now();
       quoteData.creadoEn = (allCloudQuotes.find(q=>q.id===editingQuoteId)||{}).creadoEn||Date.now();
@@ -2903,7 +2856,7 @@ async function saveQuoteToCloud(){
     const showMsg=(el)=>{
       if(!el) return;
       el.style.display='block';
-      el.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada en la nube ☁️</div>';
+      el.innerHTML='<div class="alert" style="background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green);">✅ Cotización guardada en Firebase</div>';
       setTimeout(()=>el.style.display='none',3500);
     };
     showMsg(document.getElementById('crudSaveMsg'));
