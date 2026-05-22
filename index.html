@@ -5,17 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Alpha Producciones - Cotizador</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-  
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js" crossorigin="anonymous"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js" crossorigin="anonymous"></script>
-
-<script src="app.js"></script>
-  
 <style>
 :root{--bg:#08080f;--panel:#12121e;--card:#1a1a2e;--card2:#16213e;--rowa:#0f1d3a;--rowb:#12121e;--inp:#0d1f40;--pink:#e91e8c;--cyan:#00bcd4;--gold:#ffd700;--green:#00e676;--red:#ff5252;--orange:#ff9800;--white:#fff;--light:#ccc;--muted:#6a6a8a;--r:10px;--rs:6px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1271,12 +1263,10 @@ function dlPDF(){
   var active=[];
   for(var i=0;i<all.length;i++){if(all[i].cat!=='section'&&(parseInt(qty[all[i].id])||0)>0)active.push(all[i]);}
   if(!active.length){alert('Agrega servicios al cotizador primero');return;}
-  var jp = window.jspdf;
-
-if (!jp || !jp.jsPDF) {
-  alert('jsPDF no cargado correctamente');
-  return;
-}
+  var jp=window.jspdf||jspdf;
+  if(!jp){alert('jsPDF no cargado. Verifica conexion.');return;}
+  ldgOn('Generando PDF...');
+  setTimeout(function(){
     try{
       var doc=new jp.jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
       var PW=215.9,PH=279.4,ML=14,MR=14,MT=14,MB=18,CW=PW-ML-MR;
@@ -1317,8 +1307,6 @@ if (!jp || !jp.jsPDF) {
       function need(h){if(y+h>PH-MB)newPg();}
       function band(txt){need(8);doc.setFillColor(26,26,46);doc.rect(ML,y,CW,6.5,'F');doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(255,215,0);doc.text(txt,ML+3,y+4.2);y+=8;}
 
-
-   
       // Header
       doc.setFillColor(26,26,46);doc.rect(0,0,PW,2.5,'F');
       try{doc.addImage(LOGO,'JPEG',ML,y,20,15.5);}catch(e){}
