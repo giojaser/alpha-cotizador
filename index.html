@@ -1438,10 +1438,15 @@ function dlPDF(){
       doc.splitTextToSize('Anticipo con letra: '+nL(antM),CW).forEach(function(l){need(5);doc.text(l,ML,y);y+=4.5;});y+=3;
 
       band('CLAUSULAS GENERALES');
-      var cls=[['CANCELACION','No habra reembolso del anticipo. Cambio de fecha con minimo UNA SEMANA DE ANTICIPACION.'],
-        ['PERSONAS ADICIONALES','$99.00 MXN POR PERSONA EXTRA al termino del servicio.'],
-        ['SEGURIDAD','El CONTRATANTE debera brindar condiciones adecuadas de seguridad, espacio fisico y energia electrica.'],
-        ['DANOS Y PERJUICIOS','El incumplimiento sera motivo de rescision con pago de danos y perjuicios.']];
+      // Clause 3 - Vigencia (always shown)
+      var cls=[
+        ['CLAUSULA 3 - VIGENCIA','El PRESTADOR se obliga a desempenar los servicios objeto del presente contrato en forma personal e independiente, en la fecha, lugar y horario indicados en el apartado de datos del evento.'],
+        ['CLAUSULA 4 - CANCELACION','En caso de cancelacion del evento y/o cualquier otro motivo que suspenda la actividad en la fecha acordada, no habra reembolso de la cantidad cubierta al PRESTADOR. Solo se podra hacer cambio de fecha siempre y cuando se informe con minimo UNA SEMANA DE ANTICIPACION.'],
+        ['CLAUSULA 5 - PERSONAS ADICIONALES','En caso de requerir el servicio para mas personas de las estipuladas, el CONTRATANTE se compromete a pagar el excedente con un costo de $99.00 MXN POR PERSONA EXTRA al termino del servicio.'],
+        ['CLAUSULA 6 - SEGURIDAD','El CONTRATANTE debera brindar las condiciones adecuadas de seguridad con respecto a recurso humano, espacio fisico y suministro de energia electrica al PRESTADOR, a fin de que se lleve a cabo el servicio en las mejores condiciones.'],
+        ['CLAUSULA 7 - CONFIDENCIALIDAD','Toda informacion que se suministre entre las partes, ya sea durante la fase precontractual o durante la ejecucion del servicio, sera proporcionada en terminos de estricta reserva y confidencialidad.'],
+        ['CLAUSULA 8 - DANOS Y PERJUICIOS','Queda expresamente convenido que la falta de cumplimiento a cualquiera de las obligaciones que aqui se contraen sera motivo de rescision del presente contrato, con el pago de danos y perjuicios que el incumplimiento cause a la contraparte que cumple.']
+      ];
       if(notas)cls.push(['NOTAS ADICIONALES',notas]);
       for(var ci=0;ci<cls.length;ci++){
         var bl=doc.splitTextToSize(cls[ci][1],CW);
