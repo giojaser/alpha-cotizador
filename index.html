@@ -242,6 +242,7 @@ textarea{resize:vertical;min-height:55px}
       <div class="frow"><label>Telefono cliente</label><input type="text" id="eTel" placeholder="492..."></div>
       <div class="frow"><label>Anticipo (%)</label><input type="number" id="eAnticipo" value="50" min="0" max="100"></div>
       <div class="frow"><label>No. personas (ref)</label><input type="number" id="ePersonas" value="100" min="1"></div>
+      <div class="frow" style="display:flex;align-items:center;gap:8px;padding:7px 0"><input type="checkbox" id="eIva" style="width:16px;height:16px;flex-shrink:0;accent-color:var(--gold)"><label for="eIva" style="margin:0;text-transform:none;font-size:.88rem;color:var(--gold);cursor:pointer">Incluir IVA (16%) en cotizacion</label></div>
     </div>
     <div class="frow" style="margin-top:4px"><label>Notas</label><textarea id="eNotas" placeholder="Observaciones..."></textarea></div>
   </div>
@@ -393,80 +394,80 @@ var LOGO="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwc
 const PACKAGES = [
   // id, name, category, defaultPrice, costPerUnit, isFixed, minPersons, description
   {id:1,  name:"Paquete #1 - TACOS",           cat:"comida", price:99,   cost:42,  fixed:false, min:50,  desc:"Bistec . Pastor . Arrachera . Macisa . Alambre . Birria . Carnitas"},
-  {id:2,  name:"Paquete #2 - HAMBURGUEZAS",    cat:"comida", price:99,   cost:38,  fixed:false, min:50,  desc:"18 toppings: Salchichas, Jam?n, Queso, Tocino, Pi?a, Verduras, Salsas, Papas a la Francesa"},
-  {id:3,  name:"Paquete #3 - HOT DOGS",        cat:"comida", price:99,   cost:35,  fixed:false, min:50,  desc:"Tocino . Peperoni . Salchich?n . Quesos fundidos . Chetos . Doritos . Guacamole . Chiles curtidos"},
-  {id:4,  name:"Paquete #4 - TAQUIZA",         cat:"comida", price:99,   cost:44,  fixed:false, min:50,  desc:"Azado de boda . Mole dulce . Yesca . Chicharr?n . Rajas . Deshebrada . Ilegal . Papas con chorizo . Nopalitos . Arroz . Frijoles"},
-  {id:5,  name:"Paquete #5 - COMIDA BUFETT",   cat:"comida", price:99,   cost:48,  fixed:false, min:50,  desc:"Azado . Chilaquiles . Yesca . Chicharr?n . Rajas . Deshebrada . Ilegal . Chorizo . Nopalitos . Arroz . Frijoles"},
-  {id:6,  name:"Paquete #6 - TOSTADAS",        cat:"comida", price:99,   cost:40,  fixed:false, min:50,  desc:"Tosticarnes . Trompa . Cuero . Ceviche camar?n . Ceviche pescado . Salpic?n de res . Tinga"},
-  {id:7,  name:"Paquete #7 - NUESTRAS BARRAS", cat:"barras", price:2500, cost:950, fixed:true,  min:50,  desc:"7 barras: Maruchan . Papas & Snaks . Fresas con crema . ?lotes . Crepas . Nachos & Dorinachos . Smoothies & Frapes"},
+  {id:2,  name:"Paquete #2 - HAMBURGUEZAS",    cat:"comida", price:99,   cost:38,  fixed:false, min:50,  desc:"18 toppings: Salchichas, Jamon, Queso, Tocino, Pina, Verduras, Salsas, Papas a la Francesa"},
+  {id:3,  name:"Paquete #3 - HOT DOGS",        cat:"comida", price:99,   cost:35,  fixed:false, min:50,  desc:"Tocino . Peperoni . Salchichon . Quesos fundidos . Chetos . Doritos . Guacamole . Chiles curtidos"},
+  {id:4,  name:"Paquete #4 - TAQUIZA",         cat:"comida", price:99,   cost:44,  fixed:false, min:50,  desc:"Azado de boda . Mole dulce . Yesca . Chicharron . Rajas . Deshebrada . Ilegal . Papas con chorizo . Nopalitos . Arroz . Frijoles"},
+  {id:5,  name:"Paquete #5 - COMIDA BUFETT",   cat:"comida", price:99,   cost:48,  fixed:false, min:50,  desc:"Azado . Chilaquiles . Yesca . Chicharron . Rajas . Deshebrada . Ilegal . Chorizo . Nopalitos . Arroz . Frijoles"},
+  {id:6,  name:"Paquete #6 - TOSTADAS",        cat:"comida", price:99,   cost:40,  fixed:false, min:50,  desc:"Tosticarnes . Trompa . Cuero . Ceviche camaron . Ceviche pescado . Salpicon de res . Tinga"},
+  {id:7,  name:"Paquete #7 - NUESTRAS BARRAS", cat:"barras", price:2500, cost:950, fixed:true,  min:50,  desc:"7 barras: Maruchan . Papas & Snaks . Fresas con crema . Elotes . Crepas . Nachos & Dorinachos . Smoothies & Frapes"},
   {id:8,  name:"Paquete #8 - BOX LUNCH",       cat:"comida", price:99,   cost:34,  fixed:false, min:0,   desc:"1 Sandwich o Torta . 1 Fruta . 1 Jugo . 1 Barra nutritiva"},
-  {id:9,  name:"Paquete #9 - CANAPES",         cat:"comida", price:99,   cost:38,  fixed:false, min:0,   desc:"Mini sopes . Rollitos primavera . Sushi . Sandwich . Guacamole con camar?n . Mini pizzas . Ceviche . Empanadas . Carlota . Banderillas de fruta"},
+  {id:9,  name:"Paquete #9 - CANAPES",         cat:"comida", price:99,   cost:38,  fixed:false, min:0,   desc:"Mini sopes . Rollitos primavera . Sushi . Sandwich . Guacamole con camaron . Mini pizzas . Ceviche . Empanadas . Carlota . Banderillas de fruta"},
   {id:10, name:"Barra de Bebidas",             cat:"extra",  price:45,   cost:14,  fixed:false, min:0,   desc:"Barra de bebidas surtida"},
   {id:11, name:"Barra de Snacks",              cat:"extra",  price:35,   cost:10,  fixed:false, min:0,   desc:"Botanas y snacks variados"},
-  {id:12, name:"Coffee Break",                 cat:"extra",  price:30,   cost:8,   fixed:false, min:0,   desc:"Caf?, t?, galletas, pastelillos"},
+  {id:12, name:"Coffee Break",                 cat:"extra",  price:30,   cost:8,   fixed:false, min:0,   desc:"Cafe, te, galletas, pastelillos"},
   {id:13, name:"Mesa de Postres y Dulces",     cat:"extra",  price:40,   cost:13,  fixed:false, min:0,   desc:"Mesa dulce decorada con postres variados"},
   {id:14, name:"Servicio de Meseros",          cat:"extra",  price:200,  cost:70,  fixed:true,  min:0,   desc:"Por mesero (precio fijo por persona de staff)"},
   // Sections
-  {id:"s1", name:"-- COREOGRAF?AS Y SHOWS --", cat:"section"},
-  {id:15, name:"Coreograf?as y Shows",         cat:"entret", price:3500, cost:1200,fixed:true,  min:0,   desc:"Shows coreogr?ficos, presentaciones, amenizaciones"},
-  {id:16, name:"Chambelanes (por pareja)",     cat:"entret", price:800,  cost:300, fixed:true,  min:0,   desc:"Parejas de chambelanes para XV a?os o eventos"},
+  {id:"s1", name:"-- COREOGRAFIAS Y SHOWS --", cat:"section"},
+  {id:15, name:"Coreografias y Shows",         cat:"entret", price:3500, cost:1200,fixed:true,  min:0,   desc:"Shows coreograficos, presentaciones, amenizaciones"},
+  {id:16, name:"Chambelanes (por pareja)",     cat:"entret", price:800,  cost:300, fixed:true,  min:0,   desc:"Parejas de chambelanes para XV anos o eventos"},
   {id:17, name:"Bailarines (por persona)",     cat:"entret", price:600,  cost:200, fixed:true,  min:0,   desc:"Bailarines profesionales para shows"},
   // Section
-  {id:"s2", name:"-- ORGANIZACI?N DEL EVENTO --", cat:"section"},
-  {id:18, name:"Video y Fotograf?a",           cat:"entret", price:4500, cost:1500,fixed:true,  min:0,   desc:"Filmaci?n profesional + fotograf?a del evento"},
-  {id:19, name:"C?mara 360",                   cat:"entret", price:2500, cost:800, fixed:true,  min:0,   desc:"Cabina 360? para videos virales"},
-  {id:20, name:"DJ Profesional",               cat:"entret", price:3000, cost:1000,fixed:true,  min:0,   desc:"DJ con equipo de sonido e iluminaci?n"},
-  {id:21, name:"Toro Mec?nico",                cat:"entret", price:2000, cost:700, fixed:true,  min:0,   desc:"Toro mec?nico para entretenimiento"},
-  {id:22, name:"Cabinas y Pistas de Baile",    cat:"entret", price:1500, cost:500, fixed:true,  min:0,   desc:"Cabina fotogr?fica + pista de baile iluminada"},
+  {id:"s2", name:"-- ORGANIZACION DEL EVENTO --", cat:"section"},
+  {id:18, name:"Video y Fotografia",           cat:"entret", price:4500, cost:1500,fixed:true,  min:0,   desc:"Filmacion profesional + fotografia del evento"},
+  {id:19, name:"Camara 360",                   cat:"entret", price:2500, cost:800, fixed:true,  min:0,   desc:"Cabina 360 grados para videos virales"},
+  {id:20, name:"DJ Profesional",               cat:"entret", price:3000, cost:1000,fixed:true,  min:0,   desc:"DJ con equipo de sonido e iluminacion"},
+  {id:21, name:"Toro Mecanico",                cat:"entret", price:2000, cost:700, fixed:true,  min:0,   desc:"Toro mecanico para entretenimiento"},
+  {id:22, name:"Cabinas y Pistas de Baile",    cat:"entret", price:1500, cost:500, fixed:true,  min:0,   desc:"Cabina fotografica + pista de baile iluminada"},
   {id:23, name:"Grupos Musicales",             cat:"entret", price:8000, cost:3000,fixed:true,  min:0,   desc:"Banda o grupo musical en vivo"},
-  {id:24, name:"Iluminaci?n de Evento",        cat:"entret", price:2000, cost:600, fixed:true,  min:0,   desc:"Iluminaci?n LED profesional para el sal?n"},
-  {id:25, name:"Arreglos Florales",            cat:"entret", price:1800, cost:600, fixed:true,  min:0,   desc:"Decoraci?n floral del evento"},
-  {id:26, name:"Arreglos con Globos",          cat:"entret", price:1200, cost:400, fixed:true,  min:0,   desc:"Decoraci?n con globos y arcos"},
+  {id:24, name:"Iluminacion de Evento",        cat:"entret", price:2000, cost:600, fixed:true,  min:0,   desc:"Iluminacion LED profesional para el salon"},
+  {id:25, name:"Arreglos Florales",            cat:"entret", price:1800, cost:600, fixed:true,  min:0,   desc:"Decoracion floral del evento"},
+  {id:26, name:"Arreglos con Globos",          cat:"entret", price:1200, cost:400, fixed:true,  min:0,   desc:"Decoracion con globos y arcos"},
   {id:27, name:"Mobiliario",                   cat:"entret", price:2500, cost:800, fixed:true,  min:0,   desc:"Renta de mesas, sillas, manteles"},
 ];
 const INGREDIENTS = [
-  [1,"Tortillas de ma?z (paq 30)","paquete",7,22],[1,"Bistec de res","kg",12,210],[1,"Pastor marinado","kg",8,170],
+  [1,"Tortillas de maiz (paq 30)","paquete",7,22],[1,"Bistec de res","kg",12,210],[1,"Pastor marinado","kg",8,170],
   [1,"Arrachera","kg",7,230],[1,"Carne macisa cerdo","kg",6,130],[1,"Alambre carnes mixtas","kg",5,160],
   [1,"Birria (chivo/res)","kg",7,190],[1,"Carnitas","kg",6,155],[1,"Cebolla blanca","kg",4,30],
   [1,"Cilantro","manojo",5,12],[1,"Limones","kg",6,35],[1,"Salsa roja","litro",4,40],
   [1,"Salsa verde","litro",3,35],[1,"Aceite vegetal","litro",3,38],
   [2,"Carne molida res","kg",12,190],[2,"Pan hamburguesa","bolsa 8pzas",15,35],[2,"Salchicha asar","kg",4,85],
-  [2,"Jam?n","kg",2,95],[2,"Queso manchego","kg",3,120],[2,"Tocino","kg",2,165],[2,"Cebolla","kg",3,30],
-  [2,"Pi?a","pza",3,40],[2,"Jitomate","kg",4,25],[2,"Lechuga","pza",4,20],[2,"Pepinillo","frasco",3,48],
+  [2,"Jamon","kg",2,95],[2,"Queso manchego","kg",3,120],[2,"Tocino","kg",2,165],[2,"Cebolla","kg",3,30],
+  [2,"Pina","pza",3,40],[2,"Jitomate","kg",4,25],[2,"Lechuga","pza",4,20],[2,"Pepinillo","frasco",3,48],
   [2,"Queso amarillo","kg",2,110],[2,"Mayonesa","kg",2,60],[2,"Salsa BBQ","litro",2,65],
   [2,"Catsup","litro",2,40],[2,"Guacamole (aguacate)","kg",3,80],[2,"Papas a la francesa","kg",6,55],
-  [2,"Aceite para fre?r","litro",4,38],
+  [2,"Aceite para freir","litro",4,38],
   [3,"Salchichas hot dog","paq 10pzas",12,45],[3,"Pan hot dog","bolsa 8pzas",14,28],[3,"Tocino","kg",2,165],
-  [3,"Peperoni","kg",1,110],[3,"Salchich?n","kg",1,90],[3,"Pi?a","pza",2,40],[3,"Queso blanco fundir","kg",3,90],
+  [3,"Peperoni","kg",1,110],[3,"Salchichon","kg",1,90],[3,"Pina","pza",2,40],[3,"Queso blanco fundir","kg",3,90],
   [3,"Queso amarillo","kg",2,110],[3,"Jitomate","kg",3,25],[3,"Mayonesa","kg",2,60],[3,"Mostaza","litro",2,40],
   [3,"Catsup","litro",2,40],[3,"Chetos","bolsa",10,18],[3,"Doritos","bolsa",10,18],
   [3,"Guacamole","kg",2,80],[3,"Chiles curtidos","frasco",4,35],
-  [4,"Tortillas ma?z","paq 30pzas",10,22],[4,"Azado de boda","kg",10,185],[4,"Mole en pasta","kg",1,90],
-  [4,"Yesca (carne seca)","kg",4,210],[4,"Chicharr?n","kg",3,130],[4,"Rajas con papas","kg",4,35],
+  [4,"Tortillas maiz","paq 30pzas",10,22],[4,"Azado de boda","kg",10,185],[4,"Mole en pasta","kg",1,90],
+  [4,"Yesca (carne seca)","kg",4,210],[4,"Chicharron","kg",3,130],[4,"Rajas con papas","kg",4,35],
   [4,"Deshebrada de pollo","kg",4,110],[4,"Ilegal (carnes)","kg",3,140],[4,"Chorizo","kg",3,100],
   [4,"Nopalitos","kg",2,22],[4,"Pierna de puerco","kg",3,130],[4,"Arroz","kg",4,24],[4,"Frijoles","kg",3,30],
-  [5,"Tortillas ma?z","paq 30pzas",10,22],[5,"Azado de boda","kg",10,185],[5,"Chilaquiles prep","kg",4,38],
-  [5,"Yesca","kg",3,210],[5,"Chicharr?n","kg",3,130],[5,"Rajas con papas","kg",5,35],
+  [5,"Tortillas maiz","paq 30pzas",10,22],[5,"Azado de boda","kg",10,185],[5,"Chilaquiles prep","kg",4,38],
+  [5,"Yesca","kg",3,210],[5,"Chicharron","kg",3,130],[5,"Rajas con papas","kg",5,35],
   [5,"Deshebrada pollo","kg",5,110],[5,"Ilegal","kg",3,140],[5,"Chorizo","kg",3,100],
   [5,"Nopalitos + puerco","kg",4,80],[5,"Arroz","kg",5,24],[5,"Frijoles","kg",4,30],
-  [6,"Tostadas","paq 40pzas",8,28],[6,"Camar?n limpio","kg",4,220],[6,"Filete pescado","kg",3,140],
-  [6,"Trompa cerdo cocida","kg",3,85],[6,"Cuero res cocido","kg",3,90],[6,"Carne salpic?n res","kg",4,185],
+  [6,"Tostadas","paq 40pzas",8,28],[6,"Camaron limpio","kg",4,220],[6,"Filete pescado","kg",3,140],
+  [6,"Trompa cerdo cocida","kg",3,85],[6,"Cuero res cocido","kg",3,90],[6,"Carne salpicon res","kg",4,185],
   [6,"Tinga de pollo","kg",4,115],[6,"Jitomate","kg",5,25],[6,"Cebolla morada","kg",3,35],
-  [6,"Limones","kg",6,35],[6,"Crema ?cida","litro",3,55],
+  [6,"Limones","kg",6,35],[6,"Crema acida","litro",3,55],
   [7,"Maruchan (caja 12)","caja",6,80],[7,"Papas surtidas","bolsa",20,18],[7,"Fresas frescas","kg",4,55],
   [7,"Crema","litro",3,55],[7,"Elotes tiernos","pza",55,8],[7,"Harina crepas + rellenos","kg",3,75],
   [7,"Nutella / cajeta","kg",2,95],[7,"Nachos bolsas","bolsa",15,22],[7,"Queso amarillo p/nachos","kg",3,110],
-  [7,"Frutas smoothies","kg",5,45],[7,"Base frapp? / leche","litro",5,28],
-  [8,"Pan torta / telera","pieza",105,8],[8,"Jam?n sandwich","kg",4,95],[8,"Queso manchego","kg",3,120],
+  [7,"Frutas smoothies","kg",5,45],[7,"Base frappe / leche","litro",5,28],
+  [8,"Pan torta / telera","pieza",105,8],[8,"Jamon sandwich","kg",4,95],[8,"Queso manchego","kg",3,120],
   [8,"Fruta variada","kg",6,38],[8,"Jugo 500ml","pieza",105,12],[8,"Barra nutritiva","pieza",105,18],
   [8,"Bolsa/caja empaque","pieza",105,3],
   [9,"Mini sopes (masa)","kg",3,28],[9,"Rellenos sopes (chorizo/tinga)","kg",5,60],
   [9,"Rollitos primavera","paq 10pzas",8,45],[9,"Pollo BBQ boneless","kg",3,110],
-  [9,"Mel?n","kg",4,25],[9,"Jam?n serrano","kg",1,180],[9,"Arroz sushi + surimi","kg",3,95],
-  [9,"Queso crema","kg",2,90],[9,"Aguacate (guacamole)","kg",3,85],[9,"Camar?n mediano","kg",2,220],
-  [9,"Bases mini pizza","pieza",40,8],[9,"Ceviche camar?n","kg",3,220],[9,"Sand?a","kg",5,18],
-  [9,"Mini empanadas ma?z","pieza",50,7],[9,"Pastel zanahoria porciones","pieza",50,18],
-  [9,"Mini carlota lim?n","pieza",50,20],[9,"Banderillas fruta","pieza",50,12],
+  [9,"Melon","kg",4,25],[9,"Jamon serrano","kg",1,180],[9,"Arroz sushi + surimi","kg",3,95],
+  [9,"Queso crema","kg",2,90],[9,"Aguacate (guacamole)","kg",3,85],[9,"Camaron mediano","kg",2,220],
+  [9,"Bases mini pizza","pieza",40,8],[9,"Ceviche camaron","kg",3,220],[9,"Sandia","kg",5,18],
+  [9,"Mini empanadas maiz","pieza",50,7],[9,"Pastel zanahoria porciones","pieza",50,18],
+  [9,"Mini carlota limon","pieza",50,20],[9,"Banderillas fruta","pieza",50,12],
 ];
 var qty={},uPrice={},shPrice={},purchased={},customPkgs=[],custIngs=[],delIngs=[];
 var dbPkgs=[],dbSvcs=[],dbIngs=[],allQ=[];
@@ -1284,14 +1285,17 @@ function dlPDF(){
       var tel=cleanTxt(g('eTel').value||'');
       var notas=cleanTxt(g('eNotas').value||'');
       var anticipo=parseFloat(g('eAnticipo').value)||50;
+      var conIva=g('eIva')&&g('eIva').checked;
       var totalRev=0;
+      var hasComida=false;
       var items=active.map(function(p){
         var q=parseInt(qty[p.id]);
         var price=uPrice[p.id]!==undefined?uPrice[p.id]:p.price;
         var sub=p.fixed?price:price*q;totalRev+=sub;
+        if(p.cat==='comida'||p.cat==='barras')hasComida=true;
         return{name:cleanTxt(p.name),desc:cleanTxt((p.desc||'').substring(0,75)),qty:p.fixed?'Evento completo':q+' personas',price:price,sub:sub};
       });
-      var subt=totalRev/(1+0.16),iva=totalRev-subt;
+      var subt=conIva?totalRev/(1+0.16):totalRev,iva=conIva?totalRev-subt:0;
       var antM=totalRev*anticipo/100,rest=totalRev-antM;
 
       function footer(){
@@ -1329,7 +1333,7 @@ function dlPDF(){
       doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(255,215,0);
       doc.text('CONTRATO DE PRESTACION DE SERVICIOS',ML+3,y+4.2);
       doc.setTextColor(200,200,210);
-      doc.text('Folio: '+folio+' | VALIDO 15 DIAS | IVA INCLUIDO',PW-MR,y+4.2,{align:'right'});
+      doc.text('Folio: '+folio+' | VALIDO 15 DIAS'+(conIva?' | IVA INCLUIDO':''),PW-MR,y+4.2,{align:'right'});
       y+=9;
 
       // Title
@@ -1395,7 +1399,13 @@ function dlPDF(){
       }
 
       need(24);
-      [{l:'Subtotal (sin IVA)',v:subt,t:false},{l:'IVA (16%)',v:iva,t:false},{l:'TOTAL DEL EVENTO',v:totalRev,t:true}].forEach(function(r){
+      var totRows=[];
+      if(conIva){
+        totRows.push({l:'Subtotal (sin IVA)',v:subt,t:false});
+        totRows.push({l:'IVA (16%)',v:iva,t:false});
+      }
+      totRows.push({l:'TOTAL DEL EVENTO',v:totalRev,t:true});
+      totRows.forEach(function(r){
         var rH=r.t?9:7;
         if(r.t)doc.setFillColor(26,26,46);else doc.setFillColor(245,245,250);
         doc.rect(ML,y,CW,rH,'F');
@@ -1409,13 +1419,22 @@ function dlPDF(){
       need(10);doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(30,30,30);
       doc.splitTextToSize('Total con letra: '+nL(totalRev),CW).forEach(function(l){need(5);doc.text(l,ML,y);y+=4.5;});y+=2;
 
-      need(16);doc.setFillColor(248,248,255);doc.rect(ML,y,CW,14,'F');
-      doc.setFillColor(233,30,140);doc.rect(ML,y,2,14,'F');
-      doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(30,30,30);
-      doc.text('INCLUYE en paquetes de comida:',ML+4,y+4.5);
-      doc.setFont('helvetica','normal');
-      doc.splitTextToSize('Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca. Servicio 2 horas. Min 50 personas. Persona extra: $99 MXN.',CW-6).forEach(function(l,li){doc.text(l,ML+4,y+8+li*4);});
-      y+=17;
+      if(hasComida){
+        need(16);doc.setFillColor(248,248,255);doc.rect(ML,y,CW,14,"F");
+        doc.setFillColor(233,30,140);doc.rect(ML,y,2,14,"F");
+        doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(30,30,30);
+        doc.text("INCLUYE en paquetes de comida:",ML+4,y+4.5);
+        doc.setFont("helvetica","normal");
+        doc.splitTextToSize("Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca. Servicio 2 horas. Min 50 personas. Persona extra: $99 MXN.",CW-6).forEach(function(l,li){doc.text(l,ML+4,y+8+li*4);});
+        y+=17;
+      }
+
+
+
+
+
+
+
 
       band('CLAUSULA 2 - FORMA DE PAGO');
       need(18);
@@ -1501,16 +1520,19 @@ function openPreview(autoSend){
   var tel=g('eTel').value||'';
   var notas=g('eNotas').value||'';
   var anticipo=parseFloat(g('eAnticipo').value)||50;
+  var conIva=g('eIva')&&g('eIva').checked;
   var today=new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
   var fechaFmt=fecha?new Date(fecha+'T12:00:00').toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}):'--';
   var folio='AP-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-5);
   var rev=0;
+  var hasComida=false;
   var rows='';
   for(var i=0;i<active.length;i++){
     var p=active[i];
     var q=parseInt(qty[p.id]);
     var price=uPrice[p.id]!==undefined?uPrice[p.id]:p.price;
     var sub=p.fixed?price:price*q;rev+=sub;
+    if(p.cat==='comida'||p.cat==='barras')hasComida=true;
     rows+='<tr style="background:'+(i%2?'#f8f8ff':'#fff')+'">';
     rows+='<td style="padding:6px 9px;text-align:center;color:#e91e8c;font-weight:700">'+(i+1)+'</td>';
     rows+='<td style="padding:6px 9px"><strong style="color:#1a1a2e">'+esc(p.name)+'</strong>';
@@ -1521,7 +1543,7 @@ function openPreview(autoSend){
     rows+='<td style="padding:6px 9px;text-align:right;font-weight:700;color:#1a1a2e">$'+sub.toLocaleString('es-MX')+'</td>';
     rows+='</tr>';
   }
-  var iv=0.16,sub=rev/(1+iv),iva=rev-sub,anti=rev*anticipo/100,rest=rev-anti;
+  var iv=0.16,subt=conIva?rev/(1+iv):rev,iva=conIva?rev-subt:0,anti=rev*anticipo/100,rest=rev-anti;
   var html='';
   html+='<div style="background:#fff;color:#1a1a2e;font-family:Arial,sans-serif;border-radius:6px;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.5)">';
   html+='<div style="background:#1a1a2e;height:5px"></div>';
@@ -1531,7 +1553,7 @@ function openPreview(autoSend){
   html+='<div style="font-size:.68rem;color:#666;letter-spacing:1px">MONTAJE - ORGANIZACION - PRODUCCION DE EVENTOS</div></div>';
   html+='<div style="text-align:right;font-size:.7rem;color:#444"><strong style="font-size:.8rem;color:#1a1a2e">CONTRATO / COTIZACION</strong><br>Folio: <strong style="color:#e91e8c">'+folio+'</strong><br>Fecha: '+today+'<br>WhatsApp: 492 493 8392</div>';
   html+='</div>';
-  html+='<div style="background:#1a1a2e;padding:5px 22px;display:flex;justify-content:space-between;font-size:.68rem"><span style="color:#ffd700">CONTRATO DE PRESTACION DE SERVICIOS</span><span style="color:#aaa">Folio: '+folio+' - Valido 15 dias - IVA incluido</span></div>';
+  html+='<div style="background:#1a1a2e;padding:5px 22px;display:flex;justify-content:space-between;font-size:.68rem"><span style="color:#ffd700">CONTRATO DE PRESTACION DE SERVICIOS</span><span style="color:#aaa">Folio: '+folio+' - Valido 15 dias'+(conIva?' - IVA incluido':'')+'</span></div>';
   html+='<div style="padding:14px 22px">';
   html+='<div style="text-align:center;font-weight:700;font-size:.9rem;letter-spacing:2px;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid #ccc">CONTRATO DE PRESTACION DE SERVICIOS PARA EVENTOS</div>';
   html+='<p style="font-size:.78rem;text-align:justify;line-height:1.6;margin-bottom:10px">Que celebran <strong>'+esc(cliente)+'</strong> "EL CONTRATANTE" y <strong>ALPHA PRODUCCIONES</strong>, representada por <strong>JUANA MARIA MARTINEZ SALAZAR</strong>, "EL PRESTADOR":</p>';
@@ -1549,12 +1571,16 @@ function openPreview(autoSend){
   html+='<thead><tr style="background:#1a1a2e"><th style="padding:6px 9px;color:#ffd700;text-align:left;font-size:.67rem">#</th><th style="padding:6px 9px;color:#ffd700;text-align:left;font-size:.67rem">SERVICIO</th><th style="padding:6px 9px;color:#ffd700;text-align:center;font-size:.67rem">CANT</th><th style="padding:6px 9px;color:#ffd700;text-align:right;font-size:.67rem">PRECIO</th><th style="padding:6px 9px;color:#ffd700;text-align:right;font-size:.67rem">SUBTOTAL</th></tr></thead>';
   html+='<tbody>'+rows+'</tbody>';
   html+='<tfoot>';
-  html+='<tr style="background:#f5f5fa"><td colspan="4" style="padding:5px 9px;text-align:right;font-size:.76rem">Subtotal (sin IVA)</td><td style="padding:5px 9px;text-align:right;font-weight:700">$'+sub.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td></tr>';
-  html+='<tr style="background:#f5f5fa"><td colspan="4" style="padding:5px 9px;text-align:right;font-size:.76rem">IVA (16%)</td><td style="padding:5px 9px;text-align:right;font-weight:700">$'+iva.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td></tr>';
+  if(conIva){
+    html+='<tr style="background:#f5f5fa"><td colspan="4" style="padding:5px 9px;text-align:right;font-size:.76rem">Subtotal (sin IVA)</td><td style="padding:5px 9px;text-align:right;font-weight:700">$'+subt.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td></tr>';
+    html+='<tr style="background:#f5f5fa"><td colspan="4" style="padding:5px 9px;text-align:right;font-size:.76rem">IVA (16%)</td><td style="padding:5px 9px;text-align:right;font-weight:700">$'+iva.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td></tr>';
+  }
   html+='<tr style="background:#1a1a2e"><td colspan="4" style="padding:7px 9px;text-align:right;color:#ffd700;font-weight:700">TOTAL DEL EVENTO</td><td style="padding:7px 9px;text-align:right;color:#ffd700;font-weight:700;font-size:.95rem">$'+rev.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td></tr>';
   html+='</tfoot></table>';
   html+='<p style="font-size:.76rem;margin-bottom:9px"><strong>Total con letra:</strong> '+nL(rev)+'</p>';
-  html+='<div style="background:#f8f8ff;border-left:3px solid #1a1a2e;padding:7px 11px;margin-bottom:10px;font-size:.72rem;color:#444">INCLUYE en paquetes de comida: Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca. Servicio 2 hrs. Min 50 personas. Persona extra: $99 MXN.</div>';
+  if(hasComida){
+    html+='<div style="background:#f8f8ff;border-left:3px solid #1a1a2e;padding:7px 11px;margin-bottom:10px;font-size:.72rem;color:#444">INCLUYE en paquetes de comida: Salsas, Verdura, Platos, Vasos, Cucharas, Servilletas y 1 vitrolero de agua fresca. Servicio 2 hrs. Min 50 personas. Persona extra: $99 MXN.</div>';
+  }
   html+='<div style="background:#1a1a2e;padding:4px 9px;border-radius:3px;margin-bottom:7px"><span style="color:#ffd700;font-size:.7rem;font-weight:700">FORMA DE PAGO</span></div>';
   html+='<table style="width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:7px">';
   html+='<thead><tr style="background:#1a1a2e"><th style="padding:5px 9px;color:#ffd700;text-align:left;font-size:.67rem">CONCEPTO</th><th style="padding:5px 9px;color:#ffd700;text-align:right;font-size:.67rem">MONTO</th><th style="padding:5px 9px;color:#ffd700;font-size:.67rem">VENCIMIENTO</th></tr></thead>';
@@ -1563,7 +1589,14 @@ function openPreview(autoSend){
   html+='<tr><td style="padding:6px 9px">Saldo restante ('+(100-anticipo)+'%)</td><td style="padding:6px 9px;text-align:right;font-weight:700">$'+rest.toLocaleString('es-MX',{maximumFractionDigits:0})+'</td><td style="padding:6px 9px;color:#555">Dia del evento</td></tr>';
   html+='</tbody></table>';
   html+='<p style="font-size:.76rem;margin-bottom:10px"><strong>Anticipo con letra:</strong> '+nL(anti)+'</p>';
-  var clsHtml=[['CANCELACION','No habra reembolso del anticipo. Cambio de fecha con minimo 1 semana de anticipacion.'],['PERSONAS ADICIONALES','$99.00 MXN por persona extra al termino del servicio.'],['DANOS Y PERJUICIOS','El incumplimiento sera motivo de rescision del contrato.']];
+  var clsHtml=[
+    ['CLAUSULA 3 - VIGENCIA','El PRESTADOR se obliga a desempenar los servicios objeto del presente contrato en forma personal e independiente, en la fecha, lugar y horario indicados en el apartado de datos del evento.'],
+    ['CLAUSULA 4 - CANCELACION','En caso de cancelacion del evento y/o cualquier otro motivo que suspenda la actividad en la fecha acordada, no habra reembolso de la cantidad cubierta al PRESTADOR. Solo se podra hacer cambio de fecha siempre y cuando se informe con minimo UNA SEMANA DE ANTICIPACION.'],
+    ['CLAUSULA 5 - PERSONAS ADICIONALES','En caso de requerir el servicio para mas personas de las estipuladas, el CONTRATANTE se compromete a pagar el excedente con un costo de $99.00 MXN POR PERSONA EXTRA al termino del servicio.'],
+    ['CLAUSULA 6 - SEGURIDAD','El CONTRATANTE debera brindar las condiciones adecuadas de seguridad con respecto a recurso humano, espacio fisico y suministro de energia electrica al PRESTADOR, a fin de que se lleve a cabo el servicio en las mejores condiciones.'],
+    ['CLAUSULA 7 - CONFIDENCIALIDAD','Toda informacion que se suministre entre las partes, ya sea durante la fase precontractual o durante la ejecucion del servicio, sera proporcionada en terminos de estricta reserva y confidencialidad.'],
+    ['CLAUSULA 8 - DANOS Y PERJUICIOS','Queda expresamente convenido que la falta de cumplimiento a cualquiera de las obligaciones que aqui se contraen sera motivo de rescision del presente contrato, con el pago de danos y perjuicios que el incumplimiento cause a la contraparte que cumple.']
+  ];
   if(notas)clsHtml.push(['NOTAS',esc(notas)]);
   for(var ci=0;ci<clsHtml.length;ci++){
     html+='<p style="font-size:.76rem;margin-bottom:5px;text-align:justify"><strong>'+clsHtml[ci][0]+':</strong> '+clsHtml[ci][1]+'</p>';
