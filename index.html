@@ -164,7 +164,7 @@ textarea{resize:vertical;min-height:55px}
   <div class="modal modal-sm">
     <button class="mc" onclick="closeOv('ovFb')">x</button>
     <div class="mtitle" style="color:var(--gold)">Configurar Firebase</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:13px">Pega tu firebaseConfig. Sin email ni contrasena -- conexion directa a la base de datos.</p>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:13px">Pega tu firebaseConfig. Sin correo ni contrasena -- conexion directa a la base de datos.</p>
     <div class="frow"><label>firebaseConfig</label>
       <textarea id="fbCfgTxt" rows="9" oninput="liveParseCfg()" style="font-family:monospace;font-size:.77rem;resize:vertical"></textarea>
     </div>
@@ -290,7 +290,7 @@ textarea{resize:vertical;min-height:55px}
     <div><div class="ss-l">Ganancia real</div><div class="ss-v" id="ssProfit" style="color:var(--green)">$0</div></div>
     <div><div class="ss-l">Margen real</div><div class="ss-v" id="ssMarg" style="color:var(--gold)">0%</div></div>
   </div>
-  <div id="shBnr" class="bnr bn-neu">-- Selecciona paquetes en el Cotizador --</div>
+  <div id="shBnr" class="bnr bn-neu">-- Selecciona paquetes en el cotizador --</div>
   <div id="shList"></div>
 </div></div>
 
@@ -323,16 +323,20 @@ textarea{resize:vertical;min-height:55px}
     <button class="tab"    id="at-pr" onclick="showAdmTab('pr',this)">Precios rapidos</button>
   </div>
   <div id="adm-pk">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:9px"><button class="btn btn-pink btn-sm" onclick="openPkgEd(null,'pkg')">+ Paquete</button></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th></th><th>Nombre</th><th>Precio</th><th>Costo</th><th>Margen</th><th>Cat.</th><th>Acciones</th></tr></thead><tbody id="admPkBody"></tbody></table></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:9px"><button class="btn btn-pink btn-sm" onclick="openPkgEd(null,'pkg')">+ Paquete nuevo</button></div>
+    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>#</th><th>Nombre</th><th>Precio</th><th>Costo</th><th>Margen</th><th>Acciones</th></tr></thead><tbody id="admPkBody"></tbody></table></div>
   </div>
   <div id="adm-sv" style="display:none">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:9px"><button class="btn btn-cyan btn-sm" onclick="openPkgEd(null,'svc')">+ Servicio</button></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th></th><th>Servicio</th><th>Precio</th><th>Costo</th><th>Cat.</th><th>Acciones</th></tr></thead><tbody id="admSvBody"></tbody></table></div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:9px"><button class="btn btn-cyan btn-sm" onclick="openPkgEd(null,'svc')">+ Servicio nuevo</button></div>
+    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>#</th><th>Servicio</th><th>Precio</th><th>Costo</th><th>Margen</th><th>Acciones</th></tr></thead><tbody id="admSvBody"></tbody></table></div>
   </div>
   <div id="adm-in" style="display:none">
-    <div style="margin-bottom:9px"><select id="ingFilt" onchange="renderAdmIn()" style="padding:6px 10px;background:var(--inp);border:1px solid rgba(255,215,0,.3);border-radius:var(--rs);color:var(--white);font-size:.82rem;outline:none;max-width:260px"><option value="">Todos los paquetes</option></select></div>
-    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Paquete</th><th>Ingrediente</th><th>Unidad</th><th>Cant/100p</th><th>Precio</th><th>Costo 100p</th></tr></thead><tbody id="admInBody"></tbody></table></div>
+    <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap">
+      <select id="ingFilt" onchange="renderAdmIn()" style="padding:6px 10px;background:var(--inp);border:1px solid rgba(255,215,0,.3);border-radius:var(--rs);color:var(--white);font-size:.82rem;outline:none;max-width:260px"><option value="">Todos los paquetes</option></select>
+      <button class="btn btn-green btn-sm" onclick="openNewIng()">+ Ingrediente nuevo</button>
+    </div>
+    <div class="al al-i" style="font-size:.75rem;margin-bottom:8px">Los cambios se aplican al instante. Edita directamente en la tabla.</div>
+    <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Paquete</th><th>Ingrediente</th><th>Unidad</th><th>Cant/100p</th><th>Precio ($)</th><th>Costo 100p</th><th></th></tr></thead><tbody id="admInBody"></tbody></table></div>
   </div>
   <div id="adm-pr" style="display:none">
     <div class="al al-i" style="margin-bottom:9px">Modifica precios de cualquier paquete directamente.</div>
@@ -674,7 +678,7 @@ function renderShop(){
   var active=[];
   for(var i=0;i<all.length;i++){if(all[i].cat!=='section'&&(parseInt(qty[all[i].id])||0)>0)active.push(all[i]);}
   if(!active.length){
-    container.innerHTML='<div class="al al-i">Selecciona paquetes en el Cotizador.</div>';
+    container.innerHTML='<div class="al al-i">Selecciona paquetes en el cotizador.</div>';
     ['ssIng','ssCost','ssOmit','ssProfit'].forEach(function(id){setT(id,'$0');});
     setT('ssMarg','0%');
     var b=g('shBnr');if(b){b.className='bnr bn-neu';b.textContent='-- Selecciona paquetes --';}
@@ -809,10 +813,10 @@ function renderProfit(){
   setT('evInfo',t.rev>0?'Margen: '+pct(t.margin)+' | '+fmt(t.gain):'Selecciona servicios');
   var tipsEl=g('tips');
   if(tipsEl)tipsEl.innerHTML=[
-    'Hot Dogs y Box Lunch tienen margen >60% -- son los mas rentables',
-    'Paquete Barras ($2500 fijo) garantiza ~$1550 ganancia minima',
+    'Hot Dogs y Box Lunch tienen margen >60% — son los mas rentables',
+    'Paquete Barras ($2,500 fijo) garantiza ~$1,550 de ganancia minima',
     'DJ + Camara 360 + Video suman ~$10,000 con margen 60%+',
-    'Bufett y Taquiza -- considera subir precio a $120/persona',
+    'Bufet y Taquiza — considera subir precio a $120/persona',
     'Margen objetivo saludable: minimo 40%'
   ].map(function(t){return '<div style="display:flex;gap:9px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span>*</span><span style="font-size:.83rem;color:var(--light)">'+t+'</span></div>';}).join('');
 }
@@ -835,78 +839,151 @@ function renderAdmAll(){
   else if(id==='pr')renderAdmPr();
 }
 
+// ── Overrides locales para edicion sin Firebase ───────────────────────────────
+var localPkgOverrides={};
+var localIngOverrides={};
+var localIngNew=[];
+
+function getEffPkg(p){
+  var ov=localPkgOverrides[String(p.id)];
+  return ov?Object.assign({},p,ov):p;
+}
+
 function renderAdmPk(){
   var body=g('admPkBody');if(!body)return;
   var base=PACKAGES.filter(function(p){return p.cat!=='section'&&typeof p.id==='number'&&p.id<=9;});
-  var all=base.concat(dbPkgs);
+  var all=base.concat(customPkgs.filter(function(c){return c.cat==='comida'||c.cat==='barras';}));
+  all=all.concat(dbPkgs);
   body.innerHTML=all.map(function(p,i){
-    var isDb=dbPkgs.some(function(d){return d.id===p.id;});
-    var m=p.price>0?Math.round((p.price-p.cost)/p.price*100)+'%':'--';
+    var ep=getEffPkg(p);
+    var m=ep.price>0?Math.round((ep.price-ep.cost)/ep.price*100)+'%':'--';
+    var pj=JSON.stringify(ep).replace(/"/g,'&quot;');
     return '<tr style="background:'+(i%2===0?'var(--rowb)':'var(--rowa)')+'">'+
-      '<td><span style="width:7px;height:7px;border-radius:50%;background:'+(isDb?'var(--green)':'var(--muted)')+';display:inline-block"></span></td>'+
-      '<td style="color:var(--white);font-weight:600">'+esc(p.name)+'</td>'+
-      '<td style="color:var(--cyan)">'+fmt(p.price)+'</td>'+
-      '<td style="color:var(--red)">'+fmt(p.cost)+'</td>'+
+      '<td style="color:var(--pink);font-weight:700;font-size:.75rem">'+esc(String(ep.id))+'</td>'+
+      '<td style="color:var(--white);font-weight:600">'+esc(ep.name)+'</td>'+
+      '<td style="color:var(--cyan)">'+fmt(ep.price)+'</td>'+
+      '<td style="color:var(--red)">'+fmt(ep.cost)+'</td>'+
       '<td style="color:var(--green);font-weight:700">'+m+'</td>'+
-      '<td><button class="btn btn-cyan btn-sm" onclick="openPkgEd('+JSON.stringify(p)+',\'pkg\')">Editar</button>'+
-      (isDb?'<button class="btn btn-red btn-sm" style="margin-left:4px" onclick="delRec(\'packages\',\''+p.id+'\',\'paquete\')">Borrar</button>':'')+'</td>'+
+      '<td><button class="btn btn-cyan btn-sm" onclick="openPkgEdById(''+ep.id+'','pkg')">Editar</button>'+
+      (String(p.id).charAt(0)==='L'?'<button class="btn btn-red btn-sm" style="margin-left:4px" onclick="delLocalPkg(''+p.id+'')">Borrar</button>':'')+'</td>'+
     '</tr>';
   }).join('');
 }
 
 function renderAdmSv(){
   var body=g('admSvBody');if(!body)return;
-  var base=PACKAGES.filter(function(p){return p.cat!=='section'&&typeof p.id==='number'&&p.id>=10;});
-  var all=base.concat(dbSvcs);
+  var base=PACKAGES.filter(function(p){return p.cat!=='section'&&(typeof p.id==='number'&&p.id>=10);});
+  var all=base.concat(customPkgs.filter(function(c){return c.cat==='entret'||c.cat==='extra';}));
+  all=all.concat(dbSvcs);
   body.innerHTML=all.map(function(p,i){
-    var isDb=dbSvcs.some(function(d){return d.id===p.id;});
+    var ep=getEffPkg(p);
+    var m=ep.price>0?Math.round((ep.price-ep.cost)/ep.price*100)+'%':'--';
     return '<tr style="background:'+(i%2===0?'var(--rowb)':'var(--rowa)')+'">'+
-      '<td><span style="width:7px;height:7px;border-radius:50%;background:'+(isDb?'var(--cyan)':'var(--muted)')+';display:inline-block"></span></td>'+
-      '<td style="color:var(--white);font-weight:600">'+esc(p.name)+'</td>'+
-      '<td style="color:var(--cyan)">'+fmt(p.price)+'</td>'+
-      '<td style="color:var(--red)">'+fmt(p.cost)+'</td>'+
-      '<td><button class="btn btn-cyan btn-sm" onclick="openPkgEd('+JSON.stringify(p)+',\'svc\')">Editar</button>'+
-      (isDb?'<button class="btn btn-red btn-sm" style="margin-left:4px" onclick="delRec(\'services\',\''+p.id+'\',\'servicio\')">Borrar</button>':'')+'</td>'+
+      '<td style="color:var(--pink);font-weight:700;font-size:.75rem">'+esc(String(ep.id))+'</td>'+
+      '<td style="color:var(--white);font-weight:600">'+esc(ep.name)+'</td>'+
+      '<td style="color:var(--cyan)">'+fmt(ep.price)+'</td>'+
+      '<td style="color:var(--red)">'+fmt(ep.cost)+'</td>'+
+      '<td style="color:var(--green);font-weight:700">'+m+'</td>'+
+      '<td><button class="btn btn-cyan btn-sm" onclick="openPkgEdById(''+ep.id+'','svc')">Editar</button>'+
+      (String(p.id).charAt(0)==='L'?'<button class="btn btn-red btn-sm" style="margin-left:4px" onclick="delLocalPkg(''+p.id+'')">Borrar</button>':'')+'</td>'+
     '</tr>';
   }).join('');
+}
+
+function openPkgEdById(id,type){
+  var all=getAllPkgs();
+  var p=null;
+  for(var i=0;i<all.length;i++){if(String(all[i].id)===String(id)){p=all[i];break;}}
+  openPkgEd(p,type);
 }
 
 function renderAdmIn(){
   var body=g('admInBody');if(!body)return;
   var filt=g('ingFilt');
-  if(filt&&filt.options.length<=1){
-    var allP=getAllPkgs().filter(function(p){return p.cat!=='section';});
-    filt.innerHTML='<option value="">Todos</option>'+allP.map(function(p){return '<option value="'+p.id+'">'+esc(p.name.substring(0,40))+'</option>';}).join('');
-  }
+  var allP=getAllPkgs().filter(function(p){return p.cat!=='section';});
+  filt.innerHTML='<option value="">Todos los paquetes</option>'+allP.map(function(p){return '<option value="'+p.id+'">'+esc(p.name.substring(0,40))+'</option>';}).join('');
   var filter=filt?filt.value:'';
-  var base=INGREDIENTS.map(function(ing,idx){return{id:'b'+idx,pkgId:ing[0],name:ing[1],unit:ing[2],qty100:ing[3],price:ing[4],_base:true};});
-  var all=base.concat(dbIngs.map(function(d){return Object.assign({},d,{_base:false});}));
+  var base=INGREDIENTS.map(function(ing,idx){
+    var ov=localIngOverrides['b'+idx];
+    return ov?{id:'b'+idx,pkgId:ov.pkgId!==undefined?ov.pkgId:ing[0],name:ov.name!==undefined?ov.name:ing[1],unit:ov.unit!==undefined?ov.unit:ing[2],qty100:ov.qty100!==undefined?ov.qty100:ing[3],price:ov.price!==undefined?ov.price:ing[4],_base:true}
+             :{id:'b'+idx,pkgId:ing[0],name:ing[1],unit:ing[2],qty100:ing[3],price:ing[4],_base:true};
+  });
+  var newIngs=localIngNew.map(function(ing,idx){return Object.assign({},ing,{id:'n'+idx,_new:true});});
+  var dbI=dbIngs.map(function(d){return Object.assign({},d,{_base:false});});
+  var all=base.concat(newIngs).concat(dbI);
   if(filter)all=all.filter(function(i){return String(i.pkgId)===String(filter);});
-  function pname(id){var p=getAllPkgs().find(function(p){return String(p.id)===String(id);});return p?p.name.substring(0,18):'P'+id;}
+  function pname(id){var p=allP.find(function(p){return String(p.id)===String(id);});return p?p.name.substring(0,16):'P'+id;}
   body.innerHTML=all.map(function(ing,i){
-    return '<tr style="background:'+(i%2===0?'var(--rowb)':'var(--rowa)')+'">'+
+    var bgc=i%2===0?'var(--rowb)':'var(--rowa)';
+    var iid=esc(ing.id);
+    return '<tr style="background:'+bgc+'">'+
       '<td style="font-size:.67rem;color:var(--pink)">'+esc(pname(ing.pkgId))+'</td>'+
-      '<td style="color:var(--white);font-size:.83rem">'+esc(ing.name)+'</td>'+
-      '<td style="color:var(--muted);font-size:.78rem">'+esc(ing.unit)+'</td>'+
-      '<td style="color:var(--cyan);font-weight:700">'+ing.qty100+'</td>'+
-      '<td style="color:var(--gold)">'+fmt(ing.price)+'</td>'+
-      '<td style="color:var(--green)">'+fmt((ing.qty100||0)*(ing.price||0))+'</td>'+
+      '<td><input style="width:100%;min-width:90px;padding:3px 6px;background:var(--inp);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--white);font-size:.8rem;outline:none" value="'+esc(ing.name)+'" onchange="updateIngField(''+iid+'','name',this.value,'+ing.pkgId+')"></td>'+
+      '<td><input style="width:72px;padding:3px 5px;background:var(--inp);border:1px solid rgba(255,255,255,.1);border-radius:4px;color:var(--muted);font-size:.78rem;outline:none" value="'+esc(ing.unit)+'" onchange="updateIngField(''+iid+'','unit',this.value,'+ing.pkgId+')"></td>'+
+      '<td><input type="number" style="width:60px;padding:3px 5px;background:var(--inp);border:1px solid rgba(0,188,212,.2);border-radius:4px;color:var(--cyan);font-size:.82rem;outline:none;-moz-appearance:textfield" value="'+ing.qty100+'" onchange="updateIngField(''+iid+'','qty100',parseFloat(this.value),'+ing.pkgId+')"></td>'+
+      '<td><input type="number" style="width:70px;padding:3px 5px;background:var(--inp);border:1px solid rgba(255,215,0,.3);border-radius:4px;color:var(--gold);font-size:.82rem;outline:none;-moz-appearance:textfield" value="'+ing.price+'" onchange="updateIngField(''+iid+'','price',parseFloat(this.value),'+ing.pkgId+')"></td>'+
+      '<td style="color:var(--green);font-size:.78rem" id="ingcost_'+iid+'">'+fmt((ing.qty100||0)*(ing.price||0))+'</td>'+
+      '<td><button class="btn btn-red btn-sm" onclick="delLocalIng(''+iid+'')">X</button></td>'+
     '</tr>';
   }).join('');
+}
+
+function updateIngField(id,field,val,pkgId){
+  if(id.charAt(0)==='b'){
+    if(!localIngOverrides[id])localIngOverrides[id]={pkgId:pkgId};
+    localIngOverrides[id][field]=val;
+    var idx=parseInt(id.substring(1));
+    var ing=INGREDIENTS[idx];
+    var ov=localIngOverrides[id];
+    var q=ov.qty100!==undefined?ov.qty100:ing[3];
+    var pr=ov.price!==undefined?ov.price:ing[4];
+    var cel=g('ingcost_'+id);if(cel)cel.textContent=fmt(q*pr);
+  } else if(id.charAt(0)==='n'){
+    var ni=parseInt(id.substring(1));
+    if(localIngNew[ni])localIngNew[ni][field]=val;
+  }
+}
+
+function delLocalIng(id){
+  if(!confirm('Eliminar este ingrediente?'))return;
+  if(id.charAt(0)==='b'){
+    var idx=parseInt(id.substring(1));
+    if(delIngs.indexOf('b'+idx)<0)delIngs.push('b'+idx);
+    delete localIngOverrides[id];
+  } else if(id.charAt(0)==='n'){
+    var ni=parseInt(id.substring(1));
+    localIngNew.splice(ni,1);
+  }
+  renderAdmIn();
+}
+
+function openNewIng(){
+  var filt=g('ingFilt');
+  var pkgId=filt&&filt.value?filt.value:(getAllPkgs().find(function(p){return p.cat!=='section';})||{id:1}).id;
+  localIngNew.push({pkgId:parseInt(pkgId)||1,name:'Nuevo ingrediente',unit:'pza',qty100:1,price:10});
+  renderAdmIn();
+}
+
+function delLocalPkg(id){
+  if(!confirm('Eliminar este paquete/servicio?'))return;
+  var i=customPkgs.findIndex(function(p){return String(p.id)===String(id);});
+  if(i>=0)customPkgs.splice(i,1);
+  buildTable();renderAdmAll();
 }
 
 function renderAdmPr(){
   var body=g('admPrBody');if(!body)return;
   var all=getAllPkgs().filter(function(p){return p.cat!=='section';});
   body.innerHTML=all.map(function(p,i){
-    var price=uPrice[p.id]!==undefined?uPrice[p.id]:p.price;
-    var m=price>0?Math.round((price-p.cost)/price*100)+'%':'--';
+    var ep=getEffPkg(p);
+    var price=uPrice[ep.id]!==undefined?uPrice[ep.id]:ep.price;
+    var m=price>0?Math.round((price-ep.cost)/price*100)+'%':'--';
     return '<tr style="background:'+(i%2===0?'var(--rowb)':'var(--rowa)')+'">'+
-      '<td style="color:var(--white);font-weight:600;font-size:.83rem">'+esc(p.name)+'</td>'+
-      '<td><input type="number" value="'+price+'" id="pp_'+p.id+'" style="width:95px;padding:5px 7px;background:var(--inp);border:1px solid rgba(0,188,212,.2);border-radius:4px;color:var(--cyan);font-size:.85rem;outline:none;-moz-appearance:textfield"></td>'+
-      '<td><input type="number" value="'+p.cost+'" id="pc_'+p.id+'" style="width:95px;padding:5px 7px;background:var(--inp);border:1px solid rgba(255,82,82,.2);border-radius:4px;color:var(--red);font-size:.85rem;outline:none;-moz-appearance:textfield"></td>'+
-      '<td style="color:var(--green);font-weight:700" id="pm_'+p.id+'">'+m+'</td>'+
-      '<td><button class="btn btn-green btn-sm" onclick="saveQP(\''+p.id+'\')">Guardar</button></td>'+
+      '<td style="color:var(--white);font-weight:600;font-size:.83rem">'+esc(ep.name)+'</td>'+
+      '<td><input type="number" value="'+price+'" id="pp_'+ep.id+'" style="width:95px;padding:5px 7px;background:var(--inp);border:1px solid rgba(0,188,212,.2);border-radius:4px;color:var(--cyan);font-size:.85rem;outline:none;-moz-appearance:textfield"></td>'+
+      '<td><input type="number" value="'+ep.cost+'" id="pc_'+ep.id+'" style="width:95px;padding:5px 7px;background:var(--inp);border:1px solid rgba(255,82,82,.2);border-radius:4px;color:var(--red);font-size:.85rem;outline:none;-moz-appearance:textfield"></td>'+
+      '<td style="color:var(--green);font-weight:700" id="pm_'+ep.id+'">'+m+'</td>'+
+      '<td><button class="btn btn-green btn-sm" onclick="saveQP(''+ep.id+'')">Guardar</button></td>'+
     '</tr>';
   }).join('');
 }
@@ -914,24 +991,30 @@ function renderAdmPr(){
 function saveQP(pid){
   var np=parseFloat((g('pp_'+pid)||{}).value)||0;
   var nc=parseFloat((g('pc_'+pid)||{}).value)||0;
-  if(np>0)uPrice[pid]=np;
+  if(np>0){
+    uPrice[pid]=np;
+    if(!localPkgOverrides[String(pid)])localPkgOverrides[String(pid)]={};
+    localPkgOverrides[String(pid)].price=np;
+    localPkgOverrides[String(pid)].cost=nc;
+  }
   setT('pm_'+pid,np>0?Math.round((np-nc)/np*100)+'%':'--');
-  updateKPIs();
+  updateKPIs();buildTable();
 }
 
-// ── PKG EDITOR ────────────────────────────────────────────────────────────────
+// ── PKG EDITOR ──────────────────────────────────────────────────────────────
 function openPkgEd(pkg,type){
   var t=type||'pkg';
   setT('ovPkgTitle',pkg?(t==='svc'?'Editar Servicio':'Editar Paquete'):(t==='svc'?'Nuevo Servicio':'Nuevo Paquete'));
-  g('pkId').value=pkg?String(pkg.id):'';
+  var ep=pkg?getEffPkg(pkg):null;
+  g('pkId').value=ep?String(ep.id):'';
   g('pkType').value=t;
-  g('pkName').value=pkg?pkg.name:'';
-  g('pkPrice').value=pkg?pkg.price:'';
-  g('pkCost').value=pkg?pkg.cost:'';
-  g('pkCat').value=pkg?(pkg.cat||'comida'):'comida';
-  g('pkMin').value=pkg?(pkg.min||0):0;
-  g('pkFixed').checked=pkg?!!pkg.fixed:false;
-  g('pkDesc').value=pkg?(pkg.desc||''):'';
+  g('pkName').value=ep?ep.name:'';
+  g('pkPrice').value=ep?(uPrice[ep.id]!==undefined?uPrice[ep.id]:ep.price):'';
+  g('pkCost').value=ep?ep.cost:'';
+  g('pkCat').value=ep?(ep.cat||'comida'):(t==='svc'?'entret':'comida');
+  g('pkMin').value=ep?(ep.min||0):0;
+  g('pkFixed').checked=ep?!!ep.fixed:false;
+  g('pkDesc').value=ep?(ep.desc||''):'';
   openOv('ovPkg');
 }
 
@@ -947,20 +1030,33 @@ function savePkg(){
     var basePath=(type==='svc'?'servicios/':'paquetes/')+fbUser;
     ldgOn('Guardando...');
     var prom=id?fbDb.ref(basePath+'/'+id).set(data):fbDb.ref(basePath).push(Object.assign({createdAt:Date.now()},data));
-    prom.then(function(){ldgOff();closeOv('ovPkg');}).catch(function(e){ldgOff();alert('Error: '+e.message);});
+    prom.then(function(){ldgOff();closeOv('ovPkg');renderAdmAll();buildTable();}).catch(function(e){ldgOff();alert('Error: '+e.message);});
   } else {
     if(id){
-      var i=customPkgs.findIndex(function(p){return String(p.id)===id;});
-      if(i>=0)customPkgs[i]=Object.assign(customPkgs[i],data);
+      var ci=customPkgs.findIndex(function(p){return String(p.id)===id;});
+      if(ci>=0){
+        customPkgs[ci]=Object.assign(customPkgs[ci],data);
+      } else {
+        if(!localPkgOverrides[id])localPkgOverrides[id]={};
+        Object.assign(localPkgOverrides[id],data);
+        if(price>0)uPrice[id]=price;
+      }
     } else {
-      data.id='L'+Date.now();customPkgs.push(data);
+      data.id='L'+Date.now();
+      customPkgs.push(data);
     }
-    closeOv('ovPkg');buildTable();renderAdmAll();
+    closeOv('ovPkg');buildTable();renderAdmAll();updateKPIs();
   }
 }
 
 function delRec(col,id,lbl){
-  if(!fbDb||!fbUser){alert('Conecta Firebase para eliminar');return;}
+  if(!fbDb||!fbUser){
+    if(!confirm('Eliminar '+lbl+'?'))return;
+    var i=customPkgs.findIndex(function(p){return String(p.id)===String(id);});
+    if(i>=0)customPkgs.splice(i,1);
+    buildTable();renderAdmAll();
+    return;
+  }
   if(!confirm('Eliminar este '+lbl+' permanentemente?'))return;
   var paths={packages:'paquetes/',services:'servicios/',ingredients:'ingredientes/',quotes:'cotizaciones/'};
   var path=paths[col]+fbUser+'/'+id;
@@ -1302,14 +1398,14 @@ function dlPDF(){
         var fy=PH-MB+4;
         doc.setFillColor(26,26,46);doc.rect(ML-2,fy-3,CW+4,7,'F');
         doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(200,200,210);
-        doc.text('WhatsApp: 492 493 8392 | Alpha Producciones | Zacatecas, Mexico',ML,fy+1);
+        doc.text('WhatsApp: 492 493 8392  |  Alpha Producciones  |  Zacatecas, Mexico',ML,fy+1);
         doc.setTextColor(255,215,0);
         doc.text('Folio: '+folio,PW-MR,fy+1,{align:'right'});
         doc.setFillColor(233,30,140);doc.rect(ML-2,PH-MB+5,CW+4,1.2,'F');
       }
       function newPg(){footer();doc.addPage('letter');y=MT;}
       function need(h){if(y+h>PH-MB)newPg();}
-      function band(txt){need(8);doc.setFillColor(26,26,46);doc.rect(ML,y,CW,6.5,'F');doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(255,215,0);doc.text(txt,ML+3,y+4.2);y+=8;}
+      function band(txt){need(10);doc.setDrawColor(233,30,140);doc.setLineWidth(0.5);doc.line(ML,y+7,PW-MR,y+7);doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(26,26,46);doc.text(txt,ML,y+5);y+=11;}
 
       // Header
       doc.setFillColor(26,26,46);doc.rect(0,0,PW,2.5,'F');
@@ -1618,7 +1714,7 @@ function sendWA(){
   var all=getAllPkgs();
   var active=[];
   for(var i=0;i<all.length;i++){if(all[i].cat!=='section'&&(parseInt(qty[all[i].id])||0)>0)active.push(all[i]);}
-  if(!active.length){alert('Agrega servicios primero');return;}
+  if(!active.length){alert('Agrega servicios al cotizador primero');return;}
   var cliente=g('eCliente').value||'Cliente';
   var tipo=g('eTipo').value||'evento';
   var fecha=g('eFecha').value;
